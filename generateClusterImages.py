@@ -13,10 +13,10 @@ import scipy.io
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('../Test/simdirFull')
+simDir = os.path.abspath('Files/possumSimdir')
 
-#set name of output directory: will be simdir + outputDir
-outputDirList = ['test_code2'];
+#set output directory
+outputDirList = ['../Test/simdirFulltest_code2/'];
 
 #Load in bvecs, bvals
 bvalDirList = ['test_code.bval']
@@ -88,7 +88,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 		print 'Motion:', motionArray
 
 	#Make directory for cluster files
-	simDirCluster=simDir+outputDir
+	simDirCluster=outputDir
 	call(["mkdir",simDirCluster])
 	call(["mkdir",simDirCluster+"/Results"])
 	call(["mkdir",simDirCluster+"/ResultsNoise"])
