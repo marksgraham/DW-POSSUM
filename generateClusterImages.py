@@ -13,21 +13,21 @@ pl = reload(pl)
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('../../Journal/simdirFull')
+simDir = os.path.abspath('../Test/simdirFull')
 
 #set name of output directory: will be simdir + outputDir
-outputDirList = ['CSDb2000'];
+outputDirList = ['test_code2'];
 
 #Load in bvecs, bvals
-bvalDirList = ['90dirCSD.bval']
-bvecDirList = ['90dirCSD.bvec']
+bvalDirList = ['test_code.bval']
+bvecDirList = ['test_code.bvec']
 
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[108];
+numImagesList=[3];
 
 #Choose motion file
-motionFilesList = ['Motion64+64.mat']
+motionFilesList = ['test_code.mat']
 
 
 #Choose model for diffusion weighting:
@@ -35,7 +35,7 @@ model = "SphericalHarmonics"; #Options are DT, SphericalHarmonics
 order = 8; #Only relevant if model is spherical harmonics
 
 #Choose whether to keep artefact-free images
-normalImages = "on";
+normalImages = "off";
 
 #Choose whether to generate eddy distorted images
 eddyImages = "off"; #Options are on or off
@@ -63,11 +63,10 @@ basicSettings[3]=0.06   #Diffusion gradient strength T/m
 
 #Set directories
 codeDir =  os.path.abspath('.')
-matlabDir = "/Applications/MATLAB_R2013b.app/bin/matlab"
-templateDir = os.path.abspath('../../templateHCP')
+matlabDir = "/Applications/MATLAB_R2014b.app/bin/matlab"
 
 #Load in segmentations
-segmentedBrain, segmentedBrainData = pl.loadSegData(templateDir,segName)
+segmentedBrain, segmentedBrainData = pl.loadSegData('Files/Segmentations',segName)
 
 #Load in data for attenuating segmentations
 if model == 'DT':
@@ -79,18 +78,19 @@ if model == 'DT':
 if model == 'SphericalHarmonics':
 
 	#Load in coefficients
-	coefficientsNiib1000 = nib.load(os.path.join(templateDir,'SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
+	coefficientsNiib1000 = nib.load(os.path.join('Files/SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
 	coefficientsb1000 = coefficientsNiib1000.get_data()	
 
-	coefficientsNiib2000 = nib.load(os.path.join(templateDir,'SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
+	coefficientsNiib2000 = nib.load(os.path.join(
+		'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
 	coefficientsb2000 = coefficientsNiib2000.get_data()
 
 for dirNum, outputDir in enumerate(outputDirList):
 
 	bvals, bvecs = read_bvals_bvecs(
-		'bvalsbvecs/'+bvalDirList[dirNum], 
-		'bvalsbvecs/'+bvecDirList[dirNum])
-	motionFile = 'motion/'+motionFilesList[dirNum]
+		'../Code/SimulateImages/bvalsbvecs/'+bvalDirList[dirNum], 
+		'../Code/SimulateImages/bvalsbvecs/'+bvecDirList[dirNum])
+	motionFile = '../Code/SimulateImages/motion/'+motionFilesList[dirNum]
 	print bvals
 	print bvecs
 	print outputDir
