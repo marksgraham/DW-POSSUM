@@ -128,99 +128,71 @@ def rotateBvecs(bvec, rotationAngles):
   bvecRot = np.dot(rotMat[0:3,0:3],bvec)
   return bvecRot
 
-def read_pulse(fname=None,*args,**kwargs):
-    varargin = cellarray(args)
-    nargin = 1-[fname].count(None)+len(args)
+def read_pulse(fname):
+    #Implementation of the read_pulse.m shipped with FSL. This is stripped down and assumes little-endian storage.
+    fid = open(fname,"rb")
+    testval= np.fromfile(fid, dtype=np.uint32,count = 1)
+    dummy=np.fromfile(fid, dtype=np.uint32,count = 1)
+    nrows=np.fromfile(fid, dtype=np.uint32,count = 1)
+    ncols=np.fromfile(fid, dtype=np.uint32,count = 1)
 
-    if (nargin < 1):
-        disp_(char('??? Error using ==> read_pulse'))
-        disp_(char('Not enough input arguments.'))
-        disp_(char(' '))
-        return m
-    magicnumber=42
-    endian=char('b')
-    fid=fopen_(fname,char('r'),char('b'))
-    testval=fread_(fid,1,char('uint32'))
-    if ((testval != magicnumber) and (testval != (magicnumber + 1))):
-        fclose_(fid)
-        fid=fopen_(fname,char('r'),char('l'))
-        endian=char('l')
-        testval=fread_(fid,1,char('uint32'))
-        if ((testval != magicnumber) and (testval != (magicnumber + 1))):
-            disp_(char('Can not read this file format'))
-            return m
-    dummy=fread_(fid,1,char('uint32'))
-    nrows=fread_(fid,1,char('uint32'))
-    ncols=fread_(fid,1,char('uint32'))
-    if (testval == magicnumber):
-        m=fread_(fid,nrows * ncols,char('double'))
-        m=reshape_(m,nrows,ncols)
-    if (testval == (magicnumber + 1)):
-        time=fread_(fid,nrows,char('double'))
-        mvals=fread_(fid,nrows * (ncols - 1),char('float'))
-        mvals=reshape_(mvals,nrows,ncols - 1)
-        m=zeros_(nrows,ncols)
-        m[:,1]=time
-        m[:,2:end()]=mvals
-    fclose_(fid)
+    time=np.fromfile(fid, dtype=np.float64,count = nrows)
+    mvals = np.fromfile(fid, dtype=np.float32, count = nrows*(ncols-1))
+    mvals = np.reshape(mvals,(nrows, ncols-1),order='F')
+    m = np.zeros((nrows,ncols))
+    m[:,0] = time
+    m[:,1:] = mvals
+
+    fid.close()
     return m
 
-def write_pulse(fname=None,mat=None,flag=None,*args,**kwargs):
-    varargin = cellarray(args)
-    nargin = 3-[fname,mat,flag].count(None)+len(args)
+def write_pulse(fname,mat):
+    time = mat[:,0]
+    mvals = mat[:,1:]
 
-    if (nargin < 2):
-        disp_(char('??? Error using ==> write_pulse'))
-        disp_(char('Not enough input arguments.'))
-        disp_(char(' '))
-        return
-    if (nargin == 2):
-        flag=0
-    if ((flag != 1) and (flag != 0)):
-        flag=0
-    magicnumber=42
+    fidin = open(fname,"w")  
+    magicnumber=42+1
     dummy=0
-    nrows,ncols=size_(mat,nargout=2)
-    fp=fopen_(fname,char('w'))
-    fwrite_(fp,magicnumber + flag,char('uint32'))
-    fwrite_(fp,dummy,char('uint32'))
-    fwrite_(fp,nrows,char('uint32'))
-    fwrite_(fp,ncols,char('uint32'))
-    if (flag == 0):
-        fwrite_(fp,mat,char('double'))
-    else:
-        fwrite_(fp,mat[:,1],char('double'))
-        fwrite_(fp,mat[:,2:end()],char('float'))
-    fclose_(fp)
-    return
+    [nrows,ncols]=mat.shape
+    header = np.array([magicnumber,dummy,nrows,ncols])
+    header.astype(np.uint32).tofile(fidin)
+    time.astype(np.float64).tofile(fidin)
+    mvals = np.reshape(mvals,[len(mvals)*7],order='F')
+    mvals.astype(np.float32).tofile(fidin)
+    fidin.close()
 
-def addEddyAccordingToBvec(tint=None,delta=None,Delta=None,Gdiff=None,ep=None,tau=None,bval=None,bvecx=None,bvecy=None,bvecz=None,*args,**kwargs):
-    varargin = cellarray(args)
-    nargin = 10-[tint,delta,Delta,Gdiff,ep,tau,bval,bvecx,bvecy,bvecz].count(None)+len(args)
+def addEddyAccordingToBvec(tint=None,delta=None,Delta=None,Gdiff=None,ep=None,tau=None,bval=None,bvecx=None,bvecy=None,bvecz=None):
+    #Extract pulse and pulse info - this should be in the directory
+    pulse=read_pulse("pulse")
+    pulseinfo = np.loadtxt('pulse.info')
 
-    pulse=read_pulse_(char('pulse'))
-    pulseinfo=load_(char('pulse.info'))
+    #Quick hack to ensure eddy currents scale with b-value
     Gdiff=Gdiff * bval / 2000
+
+    #Extract time
     time=pulse[:,1].T
-    numSlices=pulseinfo[13]
+    numSlices=int(pulseinfo[13])
     TRslice=pulseinfo[4]
     RFtime=time[8]
-    Eddyx=zeros_(4,length_(pulse))
-    Eddyy=zeros_(4,length_(pulse))
-    Eddyz=zeros_(4,length_(pulse))
-    for i in arange_(0,numSlices - 1).reshape(-1):
+    Eddyx=np.zeros((4,len(pulse)))
+    Eddyy=np.zeros((4,len(pulse)))
+    Eddyz=np.zeros((4,len(pulse)))
+
+    for i in range(0,numSlices - 1):
         t[1]=tint + TRslice * i
         t[2]=tint + delta + TRslice * i
         t[3]=tint + Delta + TRslice * i
         t[4]=tint + delta + Delta + TRslice * i
         RF=RFtime + TRslice * i
-        for j in arange_(1,4).reshape(-1):
-            addx=(ep * Gdiff * bvecx * (exp_(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
-            addy=(ep * Gdiff * bvecy * (exp_(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
-            addz=(ep * Gdiff * bvecz * (exp_(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
-            addx[isnan_(addx)]=0
-            addy[isnan_(addy)]=0
-            addz[isnan_(addz)]=0
+
+        #Remember the signs need to change
+        for j in range(1,4):
+            addx=(ep * Gdiff * bvecx * (np.exp(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
+            addy=(ep * Gdiff * bvecy * (np.exp(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
+            addz=(ep * Gdiff * bvecz * (np.exp(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
+            addx[np.isnan(addx)]=0
+            addy[np.isnan(addy)]=0
+            addz[np.isnan(addz)]=0
             if j == 2 or j == 3:
                 addx=addx * - 1
                 addy=addy * - 1
@@ -228,9 +200,8 @@ def addEddyAccordingToBvec(tint=None,delta=None,Delta=None,Gdiff=None,ep=None,ta
             Eddyx[j,:]=Eddyx[j,:] + addx
             Eddyy[j,:]=Eddyy[j,:] + addy
             Eddyz[j,:]=Eddyz[j,:] + addz
-    new_pulse=copy_(pulse)
-    new_pulse[:,6]=pulse[:,6] + sum_(Eddyx,1).T
-    new_pulse[:,7]=pulse[:,7] + sum_(Eddyy,1).T
-    new_pulse[:,8]=pulse[:,8] + sum_(Eddyz,1).T
-    write_pulse_(char('pulse_new'),new_pulse,1)
-    return new_pulse
+    new_pulse=pulse
+    new_pulse[:,5]=pulse[:,5] + np.sum(Eddyx,0).T
+    new_pulse[:,6]=pulse[:,6] + np.sum(Eddyy,0).T
+    new_pulse[:,7]=pulse[:,7] + np.sum(Eddyz,0).T
+    write_pulse("pulse_new",new_pulse)

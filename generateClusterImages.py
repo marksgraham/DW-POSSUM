@@ -23,7 +23,7 @@ bvalDirList = ['test_code.bval']
 bvecDirList = ['test_code.bvec']
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[3];
+numImagesList=[6];
 
 #Choose motion directory
 motionDir = ['Files/Motion/Testing']
@@ -99,7 +99,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 	for index, bvec in enumerate(bvecs[0:numImagesList[dirNum]]):
 		#This workaround lets you carry on if generating is interrupted
-		if index < 0:
+		if index < 3:
 			pass
 		else:
 			#Make directory for each setting
@@ -169,7 +169,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 					pl.generateEddyPulseFromBvecFlat(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
 				else:
 					#pl.generateEddyPulseFromBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
-					pl.addEddyAccordingToBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
+					pl.addEddyAccordingToBvec(basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
 
 				#Move eddy distorted pulse to simdir
 				call(["mv",codeDir + "/pulse_new", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse"])
@@ -177,8 +177,8 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 
 
-		if normalImages == "off":
-			call(["rm","-rf", simDirClusterDirection])
+			if normalImages == "off":
+				call(["rm","-rf", simDirClusterDirection])
 
 
 	#Tidy up:
