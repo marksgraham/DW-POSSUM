@@ -16,7 +16,7 @@ import scipy.io
 simDir = os.path.abspath('Files/possumSimdir')
 
 #set output directory
-outputDirList = ['../Test/simdirFulltest_code2/'];
+outputDirList = ['../Test/simdirFullTest2new_pulsecheck'];
 
 #Load in bvecs, bvals
 bvalDirList = ['test_code.bval']
@@ -25,8 +25,8 @@ bvecDirList = ['test_code.bvec']
 #Choose number of images to generate (must be <= length of bval file)
 numImagesList=[3];
 
-#Choose motion file
-motionFilesList = ['test_code.mat']
+#Choose motion directory
+motionDir = ['Files/Motion/Testing']
 
 #Choose whether to keep artefact-free images
 normalImages = "off";
@@ -74,18 +74,10 @@ for dirNum, outputDir in enumerate(outputDirList):
 	bvals, bvecs = read_bvals_bvecs(
 		'../Code/SimulateImages/bvalsbvecs/'+bvalDirList[dirNum], 
 		'../Code/SimulateImages/bvalsbvecs/'+bvecDirList[dirNum])
-	motionFile = '../Code/SimulateImages/motion/'+motionFilesList[dirNum]
 	print bvals
 	print bvecs
 	print outputDir
-	print motionFile
 
-	#Load motion data
-	if motionAndEddyImages == "on":
-		motionParams = scipy.io.loadmat(motionFile)
-		motionParams = motionParams["motionFile"]
-		motionArray =np.zeros([2,7])
-		print 'Motion:', motionArray
 
 	#Make directory for cluster files
 	simDirCluster=outputDir
@@ -97,7 +89,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 	call(["mkdir",simDirCluster+"/Distortions/Eddy"])
 	pl.initialise(simDir,codeDir)
 	if motionAndEddyImages == "on":
-		call(["cp", motionFile, simDirCluster+"/Distortions/Motion/motion.mat"])
+		call(["cp", "-r", motionDir[dirNum], simDirCluster+"/Distortions/Motion"])
 		call(["cp",simDir+"/pulse",simDirCluster+"/Distortions/Eddy"])
 
 
@@ -162,40 +154,28 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 			call(["mv",codeDir + "/attenuatedBrainPy.nii.gz", simDirClusterDirection+ "/brain.nii.gz"])
 
+			#Register to reference brain to get sizes right
+			call(["flirt","-in",simDirClusterDirection+ "/brain.nii.gz","-ref",simDirCluster+ "/brainref.nii.gz","-applyxfm","-out",simDirClusterDirection+ "/brain.nii.gz"])
+
 			#Apply motion to brain here
 			if motionAndEddyImages == "on":
-				#Make FLIRT matrix
-				pl.makeRotMatrix(motionParams[index,:],simDirClusterDirection)
-				#Use FLIRT on the seg
-				call(["flirt","-in",simDirClusterDirection+ "/brain.nii.gz","-ref", simDirClusterDirection+ "/brain.nii.gz","-out",simDirClusterDirection+ "/brainMotion.nii.gz", "-applyxfm","-init", "trans.mat"])
-				#Register to ref
-				call(["flirt","-in",simDirClusterDirection+ "/brainMotion.nii.gz","-ref",simDirCluster+ "/brainref.nii.gz","-applyxfm","-out",simDirClusterDirection+ "/brainMotion.nii.gz"])
+				simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(index)
+				call(["cp","-r",simDirClusterDirection,simDirClusterDirectionMotionAndEddy])
+				call(["cp", motionDir[dirNum] + "/motion" + str(index) + '.txt', simDirClusterDirectionMotionAndEddy+ "/motion"  ])
 
-				#Remove FLIRT matrix
-				call(["rm", "trans.mat"])
-
-
-				#Register to reference brain to get sizes right
-				call(["flirt","-in",simDirClusterDirection+ "/brain.nii.gz","-ref",simDirCluster+ "/brainref.nii.gz","-applyxfm","-out",simDirClusterDirection+ "/brain.nii.gz"])
-
-
-				call(["cp","-r",simDirClusterDirection,simDirCluster+"/DirectionMotionAndEddy"+str(index)])
-			
+				
 				#Make distorted eddy pulse
 				if eddyGradients=='flat':
 					pl.generateEddyPulseFromBvecFlat(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
 				else:
-					pl.generateEddyPulseFromBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
+					#pl.generateEddyPulseFromBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
+					pl.addEddyAccordingToBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
 
 				#Move eddy distorted pulse to simdir
 				call(["mv",codeDir + "/pulse_new", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse"])
-
-				call(["cp", simDirCluster+"/Direction"+str(index)+"/brainMotion.nii.gz", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/brain.nii.gz"])
-				call(["rm",simDirClusterDirection+ "/brainMotion.nii.gz"])
-				call(["rm",simDirCluster+"/DirectionMotionAndEddy"+str(index)+ "/brainMotion.nii.gz"])
 				call(["cp", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse", simDirCluster+"/Distortions/Eddy/pulseEddy"+str(index)])
 
-	
+
 
 		if normalImages == "off":
 			call(["rm","-rf", simDirClusterDirection])
@@ -203,3 +183,4 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 	#Tidy up:
 	pl.tidyUp(simDir,codeDir)
+
