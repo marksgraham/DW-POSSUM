@@ -161,7 +161,8 @@ def write_pulse(fname,mat):
     mvals.astype(np.float32).tofile(fidin)
     fidin.close()
 
-def addEddyAccordingToBvec(tint=None,delta=None,Delta=None,Gdiff=None,ep=None,tau=None,bval=None,bvecx=None,bvecy=None,bvecz=None):
+def addEddyAccordingToBvec(tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
+   #import ipdb; ipdb.set_trace()
     #Extract pulse and pulse info - this should be in the directory
     pulse=read_pulse("pulse")
     pulseinfo = np.loadtxt('pulse.info')
@@ -170,30 +171,32 @@ def addEddyAccordingToBvec(tint=None,delta=None,Delta=None,Gdiff=None,ep=None,ta
     Gdiff=Gdiff * bval / 2000
 
     #Extract time
-    time=pulse[:,1].T
-    numSlices=int(pulseinfo[13])
-    TRslice=pulseinfo[4]
-    RFtime=time[8]
+    time=pulse[:,0].T
+    numSlices=int(pulseinfo[12])
+    TRslice=pulseinfo[3]
+    RFtime=time[7]
     Eddyx=np.zeros((4,len(pulse)))
     Eddyy=np.zeros((4,len(pulse)))
     Eddyz=np.zeros((4,len(pulse)))
 
-    for i in range(0,numSlices - 1):
-        t[1]=tint + TRslice * i
-        t[2]=tint + delta + TRslice * i
-        t[3]=tint + Delta + TRslice * i
-        t[4]=tint + delta + Delta + TRslice * i
+    for i in range(numSlices):
+        t = np.zeros(4)
+        t[0]=tint + TRslice * i
+        t[1]=tint + delta + TRslice * i
+        t[2]=tint + Delta + TRslice * i
+        t[3]=tint + delta + Delta + TRslice * i
         RF=RFtime + TRslice * i
 
         #Remember the signs need to change
-        for j in range(1,4):
-            addx=(ep * Gdiff * bvecx * (np.exp(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
-            addy=(ep * Gdiff * bvecy * (np.exp(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
-            addz=(ep * Gdiff * bvecz * (np.exp(- (time - t[j]) / tau))).dot((time > t[j])).dot((time > RF))
+        for j in range(4):
+            logical = (time > t[j]) * (time > RF)
+            addx=(ep * Gdiff * bvec[0] * (np.exp(- (time - t[j]) / tau))) * logical
+            addy=(ep * Gdiff * bvec[1] * (np.exp(- (time - t[j]) / tau))) * logical
+            addz=(ep * Gdiff * bvec[2] * (np.exp(- (time - t[j]) / tau))) * logical
             addx[np.isnan(addx)]=0
             addy[np.isnan(addy)]=0
             addz[np.isnan(addz)]=0
-            if j == 2 or j == 3:
+            if j == 1 or j == 2:
                 addx=addx * - 1
                 addy=addy * - 1
                 addz=addz * - 1

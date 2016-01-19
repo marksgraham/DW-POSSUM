@@ -99,7 +99,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 	for index, bvec in enumerate(bvecs[0:numImagesList[dirNum]]):
 		#This workaround lets you carry on if generating is interrupted
-		if index < 3:
+		if index < 0:
 			pass
 		else:
 			#Make directory for each setting
