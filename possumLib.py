@@ -186,10 +186,12 @@ def addEddyAccordingToBvec(tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
         t[2]=tint + Delta + TRslice * i
         t[3]=tint + delta + Delta + TRslice * i
         RF=RFtime + TRslice * i
+        #sliceEnd allows the eddy current to be cut off at the end of the slice acquistion, preventing the slice-wise buildup of ECs. This allows me to shorten TRslice to a realistic value in the simulations whilst not needing to model slice-by-slice buildup for now.
+        sliceEnd = TRslice * ( i + 1)
 
         #Remember the signs need to change
         for j in range(4):
-            logical = (time > t[j]) * (time > RF)
+            logical = (time > t[j]) * (time > RF) * (time < sliceEnd)
             addx=(ep * Gdiff * bvec[0] * (np.exp(- (time - t[j]) / tau))) * logical
             addy=(ep * Gdiff * bvec[1] * (np.exp(- (time - t[j]) / tau))) * logical
             addz=(ep * Gdiff * bvec[2] * (np.exp(- (time - t[j]) / tau))) * logical

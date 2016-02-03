@@ -13,20 +13,20 @@ import scipy.io
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdir')
+simDir = os.path.abspath('Files/possumSimdirShortTR')
 
 #set output directory
-outputDirList = ['../Test/simdirFullTest2new_pulsecheck'];
+outputDirList = ['../Test/newTR2'];
 
 #Load in bvecs, bvals
 bvalDirList = ['test_code.bval']
 bvecDirList = ['test_code.bvec']
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[6];
+numImagesList=[3];
 
 #Choose motion directory
-motionDir = ['Files/Motion/Testing']
+motionDir = ['Files/Motion/NoMotion']
 
 #Choose whether to keep artefact-free images
 normalImages = "off";
