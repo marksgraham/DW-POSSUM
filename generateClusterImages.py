@@ -13,20 +13,20 @@ import scipy.io
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdirShortTR')
+simDir = os.path.abspath('Files/possumSimdirSliceRes4')
 
 #set output directory
-outputDirList = ['../Test/newTR2'];
+outputDirList = ['../SliceMotion/stepMotionMassiveRes4'];
 
 #Load in bvecs, bvals
-bvalDirList = ['test_code.bval']
-bvecDirList = ['test_code.bvec']
+bvalDirList = ['simulation.bval']
+bvecDirList = ['simulation.bvec']
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[3];
+numImagesList=[5];
 
 #Choose motion directory
-motionDir = ['Files/Motion/NoMotion']
+motionDir = ['Files/Motion/StepMotionExtrapolatedMassiveMotion']
 
 #Choose whether to keep artefact-free images
 normalImages = "off";
@@ -83,7 +83,6 @@ for dirNum, outputDir in enumerate(outputDirList):
 	simDirCluster=outputDir
 	call(["mkdir",simDirCluster])
 	call(["mkdir",simDirCluster+"/Results"])
-	call(["mkdir",simDirCluster+"/ResultsNoise"])
 	call(["mkdir",simDirCluster+"/Distortions"])
 	call(["mkdir",simDirCluster+"/Distortions/Motion"])
 	call(["mkdir",simDirCluster+"/Distortions/Eddy"])
