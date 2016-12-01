@@ -13,26 +13,26 @@ import scipy.io
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdirSliceRes4')
+simDir = os.path.abspath('Files/possumSimdirShortTR')
 
 #set output directory
-outputDirList = ['../SliceMotion/stepMotionMassiveRes4'];
+outputDirList = ['../SignalDropout/Mahmoud'];
 
 #Load in bvecs, bvals
-bvalDirList = ['simulation.bval']
-bvecDirList = ['simulation.bvec']
+bvalDirList = ['bvalsMahmoud']
+bvecDirList = ['bvecsMahmoud']
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[5];
+numImagesList=[67];
 
 #Choose motion directory
-motionDir = ['Files/Motion/StepMotionExtrapolatedMassiveMotion']
+motionDir = ['None']#['Files/Motion/MarcoPhase']
 
 #Choose whether to keep artefact-free images
-normalImages = "off";
+normalImages = "on";
 
 #Choose whether to generate distorted images
-motionAndEddyImages = "on";
+motionAndEddyImages = "off";
 
 ###############################################################################
 #Choose segmentation
@@ -41,7 +41,7 @@ segName = 'HCP_seg_clipped.nii.gz'
 
 
 #Set eddy current distortion parameters
-ep = 0.006 #default is 0.006
+ep =0.006 #default is 0.006
 tau = 0.1
 basicSettings = [0]*4
 basicSettings[0]=0.001  #Leave a short gap before first gradient pulse /s
@@ -160,7 +160,8 @@ for dirNum, outputDir in enumerate(outputDirList):
 			if motionAndEddyImages == "on":
 				simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(index)
 				call(["cp","-r",simDirClusterDirection,simDirClusterDirectionMotionAndEddy])
-				call(["cp", motionDir[dirNum] + "/motion" + str(index) + '.txt', simDirClusterDirectionMotionAndEddy+ "/motion"  ])
+				if motionDir is not "None":
+					call(["cp", motionDir[dirNum] + "/motion" + str(index) + '.txt', simDirClusterDirectionMotionAndEddy+ "/motion"  ])
 
 				
 				#Make distorted eddy pulse

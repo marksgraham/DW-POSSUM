@@ -79,6 +79,9 @@ def attenuateImageSphericalHarmonics (image, B, coefficients,bval, bvalStandard)
 
   attenuationMap = np.array([np.tile(attenuationMap, (1,1)) for i in xrange(3)]) 
   attenuationMap = np.transpose(attenuationMap,[1,2,3,0])
+
+  #Get rid of any negative values
+  attenuationMap[attenuationMap < 0] = 0
   #Correct for b-value not being exactly 1000/2000 using mono-exponential assumption:
   if abs(bval-bvalStandard) > 50:
     attenuationMap=np.log(attenuationMap) * (bval/bvalStandard)
@@ -175,6 +178,10 @@ def addEddyAccordingToBvec(tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
     numSlices=int(pulseinfo[12])
     TRslice=pulseinfo[3]
     RFtime=time[7]
+    #Adjust RF time for spin-echo pulse sequences
+    if pulseinfo[0]==3:
+      RFtime=time[14]
+
     Eddyx=np.zeros((4,len(pulse)))
     Eddyy=np.zeros((4,len(pulse)))
     Eddyz=np.zeros((4,len(pulse)))
