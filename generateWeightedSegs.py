@@ -11,17 +11,17 @@ import scipy.io
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdirSliceRes4')
+simDir = os.path.abspath('Files/possumSimdirSESliceRes4Suscept')
 
 #set output directory
-outputDirList = ['/Users/markgraham/Dropbox/UCL/Projects/EddyCurrents/Simulation/MotionWithSus/WeightedSegsb1000/'];
+outputDirList = ['/Users/markgraham/Dropbox/UCL/Projects/EddyCurrents/Simulation/MotionWithSus/JesperPaper/FMRIBweightedsegsb1000'];
 
 #Load in bvecs, bvals
-bvalDirList = ['simulationb1000.bval']
-bvecDirList = ['simulation.bvec']
+bvalDirList = ['../MotionWithSus/JesperPaper/bvalsfmrib']
+bvecDirList = ['../MotionWithSus/JesperPaper/bvecsfmrib']
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[36];
+numImagesList=[65];
 
 
 #Choose whether to keep artefact-free images
@@ -45,17 +45,16 @@ segmentedBrain, segmentedBrainData = pl.loadSegData('Files/Segmentations',segNam
 #Load in spherical harmonic coefficients
 order = 8;
 coefficientsNiib1000 = nib.load(os.path.join('Files/SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
-coefficientsb1000 = coefficientsNiib1000.get_data()	
+coefficientsb1000 = coefficientsNiib1000.get_data()
 
-coefficientsNiib2000 = nib.load(os.path.join(
-	'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
-coefficientsb2000 = coefficientsNiib2000.get_data()
+# coefficientsNiib2000 = nib.load(os.path.join(
+# 	'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
+# coefficientsb2000 = coefficientsNiib2000.get_data()
 
 for dirNum, outputDir in enumerate(outputDirList):
 
-	bvals, bvecs = read_bvals_bvecs(
-		'../Code/SimulateImages/bvalsbvecs/'+bvalDirList[dirNum], 
-		'../Code/SimulateImages/bvalsbvecs/'+bvecDirList[dirNum])
+	bvals, bvecs = read_bvals_bvecs(bvalDirList[dirNum], 
+		bvecDirList[dirNum])
 	print bvals
 	print bvecs
 	print outputDir

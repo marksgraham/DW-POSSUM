@@ -13,17 +13,17 @@ import scipy.io
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdirSESliceRes4')
+simDir = os.path.abspath('Files/possumSimdirSESliceRes4SusceptExtendedFOV')
 
 #set output directory
-outputDirList = '../MotionWithSus/pulseFiles';
+outputDirList = '../MotionWithSus/JesperPaper/pulseFilesExtendedFOV';
 
 #Load in bvecs, bvals
-bvalDirList = 'simulationb1000.bval'
-bvecDirList = 'simulation.bvec'
+bvalDirList = 'bvalsfmrib'
+bvecDirList = 'bvecsfmrib'
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=36;
+numImagesList=65;
 
 
 #Choose whether to keep artefact-free images
