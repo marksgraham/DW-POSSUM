@@ -8,12 +8,12 @@ curl -L -o coefficientsUpsampledb2000n8.nii.gz https://www.dropbox.com/s/4mpl9cs
 
 
 #Move to correct location
-mkdir Files2
-mkdir Files2/SphericalHarmonics
-unzip -n -d Files2/POSSUMdirectories possumtest.zip
-unzip -n -d Files2/Segmentations segmentations.zip
-mv coefficientsUpsampledb1000n8.nii.gz Files2/SphericalHarmonics/
-mv coefficientsUpsampledb2000n8.nii.gz Files2/SphericalHarmonics/
+mkdir Files
+mkdir Files/SphericalHarmonics
+unzip -n -d Files/POSSUMdirectories possumtest.zip
+unzip -n -d Files/Segmentations segmentations.zip
+mv coefficientsUpsampledb1000n8.nii.gz Files/SphericalHarmonics/
+mv coefficientsUpsampledb2000n8.nii.gz Files/SphericalHarmonics/
 
 
 #Clean up
