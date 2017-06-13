@@ -11,18 +11,19 @@ import numpy as np
 #pl=reload(pl)
 
 ###################################Check these before running######################################################
-simDirCluster = os.path.abspath('../../SliceMotion/stepMotionMassive/')
-numImages = 6
+simDirCluster = os.path.abspath('/cluster/project0/POSSUM/Simulations/MotionWithSus/JesperPaper/Simulations/gt')
+numImages = 65
 
 #Distortions
-normalImages = "off"
-motionAndEddyImages = "on"
+normalImages = "on"
+motionAndEddyImages = "off"
 
 #Noise
-noiseLevel = [0,0.0081, 0.0165] #0.014, 0.023] #noise sigma
+noiseLevel = [0,0.0081, 0.0165] #noise sigma - these values give SNR 0, 40, 20 for 2.5mm isotropic DWI data
+#noiseLevel = [0]#,0.003,0.009] #noise sigma - these values give SNR 0, 40, 20 for 2mm isotropic DWI data
 
 #Interleaving
-interleaveFactor = 1;
+interleaveFactor = 2;
 #################################################################################################################
 
 def saveImage(simDir,saveImageDir,fileName):
@@ -81,25 +82,32 @@ resultsDir = simDirCluster+"/Results"
 for direction in range(numImages):
 	if motionAndEddyImages == "on":
 		simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(direction)
-
-		signal = readSignal(simDirClusterDirectionMotionAndEddy+'/signal')
-		signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
-		writeSignal(simDirClusterDirectionMotionAndEddy+'/signal',signalUninterleaved)
+		if interleaveFactor > 1:
+			signal = readSignal(simDirClusterDirectionMotionAndEddy+'/signal')
+			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
+			writeSignal(simDirClusterDirectionMotionAndEddy+'/signalUninterleaved',signalUninterleaved)
+		else:
+			call(["cp",simDirClusterDirectionMotionAndEddy+'/signal',simDirClusterDirectionMotionAndEddy+'/signalUninterleaved'])
 
 	if normalImages == "on":
 		simDirClusterDirection = simDirCluster+"/Direction"+str(direction)
-
+		if interleaveFactor > 1:
+			signal = readSignal(simDirClusterDirection+'/signal')
+			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
+			writeSignal(simDirClusterDirection+'/signalUninterleaved',signalUninterleaved)
+		else:
+			call(["cp",simDirClusterDirection+'/signal',simDirClusterDirection+'/signalUninterleaved'])
 
 	#Generate noise
 	for sigma in noiseLevel:
 		if normalImages == "on":
-			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirection+"/signal","-o",simDirClusterDirection+"/signalNoise"])
-			call(["signal2image","-i",simDirClusterDirection+"/signalNoise","-p",simDirClusterDirection+"/pulse","-o",simDirClusterDirection+"/imageNoise","-a"])
+			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirection+"/signalUninterleaved","-o",simDirClusterDirection+"/signalNoise"])
+			call(["/home/mgraham/possumDEV/bin/signal2image","-i",simDirClusterDirection+"/signalNoise","-p",simDirClusterDirection+"/pulse","-o",simDirClusterDirection+"/imageNoise","-a"])
 
 
 		if motionAndEddyImages == "on":
-			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirectionMotionAndEddy+"/signal","-o",simDirClusterDirectionMotionAndEddy+"/signalNoise"])
-			call(["signal2image","-i",simDirClusterDirectionMotionAndEddy+"/signalNoise","-p",simDirClusterDirectionMotionAndEddy+"/pulse","-o",simDirClusterDirectionMotionAndEddy+"/imageNoise","-a"])
+			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirectionMotionAndEddy+"/signalUninterleaved","-o",simDirClusterDirectionMotionAndEddy+"/signalNoise"])
+			call(["/home/mgraham/possumDEV/bin/signal2image","-i",simDirClusterDirectionMotionAndEddy+"/signalNoise","-p",simDirClusterDirectionMotionAndEddy+"/pulse","-o",simDirClusterDirectionMotionAndEddy+"/imageNoise","-a"])
 
 		#Save
 		if motionAndEddyImages == "on":
@@ -122,4 +130,11 @@ if motionAndEddyImages == "on":
 
 
 if normalImages == "on":
-	pass
+	for sigma in noiseLevel:
+		callMergeNoise = "fslmerge -a " + resultsDir + "/diff_sigma{} ".format(sigma)
+		callDelNoise = "rm "
+		for i in range(numImages):
+			callMergeNoise += resultsDir + "/diff_sigma{}_image{}.nii.gz ".format(sigma,i)
+			callDelNoise += resultsDir + "/diff_sigma{}_image{}.nii.gz ".format(sigma,i)
+		os.system(callMergeNoise)
+		os.system(callDelNoise)

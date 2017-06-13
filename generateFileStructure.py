@@ -9,24 +9,24 @@ import nibabel as nib
 import possumLib as pl
 import numpy as np
 import scipy.io
-#pl = reload(pl)
+
 
 ################Check the following are correct before running#################
 #Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdirShortTR')
+simDir = os.path.abspath('Files/POSSUMdirectories/possumSimdirOneSlice/')
 
 #set output directory
-outputDirList = ['../SignalDropout/Mahmoud'];
+outputDirList = ['Test/'];
 
 #Load in bvecs, bvals
-bvalDirList = ['bvalsMahmoud']
-bvecDirList = ['bvecsMahmoud']
+bvalDirList = ['bvalsfmrib']
+bvecDirList = ['bvecsfmrib']
 
 #Choose number of images to generate (must be <= length of bval file)
-numImagesList=[67];
+numImagesList=[3];
 
 #Choose motion directory
-motionDir = ['None']#['Files/Motion/MarcoPhase']
+motionDir = ['None']
 
 #Choose whether to keep artefact-free images
 normalImages = "on";
@@ -72,8 +72,8 @@ coefficientsb2000 = coefficientsNiib2000.get_data()
 for dirNum, outputDir in enumerate(outputDirList):
 
 	bvals, bvecs = read_bvals_bvecs(
-		'../Code/SimulateImages/bvalsbvecs/'+bvalDirList[dirNum], 
-		'../Code/SimulateImages/bvalsbvecs/'+bvecDirList[dirNum])
+		'Files/bvalsbvecs/'+bvalDirList[dirNum], 
+		'Files/bvalsbvecs/'+bvecDirList[dirNum])
 	print bvals
 	print bvecs
 	print outputDir

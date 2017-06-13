@@ -17,13 +17,13 @@ def saveNoiseyImage(simDir,saveImageDir,fileName):
     call(["mv", simDir + "/imageNoise_abs.nii.gz", os.path.join(saveImageDir,fileName)])
 ################################### CHECK THIS PART ###########################################################
 #Choose relevant directories:
-simDirCluster = os.path.abspath('../Susceptibility/Misc/simdirDiff/b1000//sus-blipdown-motion/')
-numImages = 36
+simDirCluster = os.path.abspath('Test/')
+numImages = 2
 normalImages = "on"
 eddyImages = "off" #on or off
 motionImages = "off"
 motionAndEddyImages = "off"
-processors = 20 #split each image up this many times for parallelisation
+processors = 1 #split each image up this many times for parallelisation
 ###############################################################################################################
 
 resultsDir = simDirCluster+"/Results"
