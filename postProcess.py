@@ -11,8 +11,8 @@ import numpy as np
 #pl=reload(pl)
 
 ###################################Check these before running######################################################
-simDirCluster = os.path.abspath('/cluster/project0/POSSUM/Simulations/MotionWithSus/JesperPaper/Simulations/gt')
-numImages = 65
+simDirCluster = os.path.abspath('Test/')
+numImages = 3
 
 #Distortions
 normalImages = "on"
@@ -23,7 +23,7 @@ noiseLevel = [0,0.0081, 0.0165] #noise sigma - these values give SNR 0, 40, 20 f
 #noiseLevel = [0]#,0.003,0.009] #noise sigma - these values give SNR 0, 40, 20 for 2mm isotropic DWI data
 
 #Interleaving
-interleaveFactor = 2;
+interleaveFactor = 1;
 #################################################################################################################
 
 def saveImage(simDir,saveImageDir,fileName):
@@ -102,12 +102,12 @@ for direction in range(numImages):
 	for sigma in noiseLevel:
 		if normalImages == "on":
 			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirection+"/signalUninterleaved","-o",simDirClusterDirection+"/signalNoise"])
-			call(["/home/mgraham/possumDEV/bin/signal2image","-i",simDirClusterDirection+"/signalNoise","-p",simDirClusterDirection+"/pulse","-o",simDirClusterDirection+"/imageNoise","-a"])
+			call(["signal2image","-i",simDirClusterDirection+"/signalNoise","-p",simDirClusterDirection+"/pulse","-o",simDirClusterDirection+"/imageNoise","-a"])
 
 
 		if motionAndEddyImages == "on":
 			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirectionMotionAndEddy+"/signalUninterleaved","-o",simDirClusterDirectionMotionAndEddy+"/signalNoise"])
-			call(["/home/mgraham/possumDEV/bin/signal2image","-i",simDirClusterDirectionMotionAndEddy+"/signalNoise","-p",simDirClusterDirectionMotionAndEddy+"/pulse","-o",simDirClusterDirectionMotionAndEddy+"/imageNoise","-a"])
+			call(["signal2image","-i",simDirClusterDirectionMotionAndEddy+"/signalNoise","-p",simDirClusterDirectionMotionAndEddy+"/pulse","-o",simDirClusterDirectionMotionAndEddy+"/imageNoise","-a"])
 
 		#Save
 		if motionAndEddyImages == "on":
