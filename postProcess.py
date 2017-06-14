@@ -7,24 +7,35 @@ import os
 from subprocess import call
 import sys
 import numpy as np
+import argparse
 #import possumLib as pl
 #pl=reload(pl)
 
-###################################Check these before running######################################################
-simDirCluster = os.path.abspath('Test/')
-numImages = 3
+parser = argparse.ArgumentParser(description="Tidy up the simulations.")
 
-#Distortions
-normalImages = "on"
-motionAndEddyImages = "off"
+parser.add_argument("simulation_dir",help="Path to the simulation directory (output_dir of generateFileStructure.py)")
+parser.add_argument("num_images",help='Number of volumes.',type=int)
+parser.add_argument("--simulate_artefact_free",help='Run simulation on datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
+parser.add_argument("--simulate_distorted",help='Run simulation datasets with eddy-current and motion artefacts. Default=False',action="store_true",default=0)
+parser.add_argument("--noise_levels",help="Set sigma for the noise level in the dataset. Can pass multiple values seperated by spaces.",nargs="+",default=0,type=float)
+parser.add_argument("--interleave_factor",help="Set this if the simulation slice order has been interleaved.",type=int,default=1)
 
-#Noise
-noiseLevel = [0,0.0081, 0.0165] #noise sigma - these values give SNR 0, 40, 20 for 2.5mm isotropic DWI data
-#noiseLevel = [0]#,0.003,0.009] #noise sigma - these values give SNR 0, 40, 20 for 2mm isotropic DWI data
+args=parser.parse_args()
 
-#Interleaving
-interleaveFactor = 1;
-#################################################################################################################
+simDirCluster = os.path.abspath(args.simulation_dir)
+numImages = args.num_images
+normalImages = args.simulate_artefact_free
+motionAndEddyImages = args.simulate_distorted
+
+print args.noise_levels
+
+noiseLevel = args.noise_levels
+
+for sigma in noiseLevel:
+	print sigma
+
+interleaveFactor = args.interleave_factor
+
 
 def saveImage(simDir,saveImageDir,fileName):
 	call(["mv", simDir + "/image_abs.nii.gz", os.path.join(saveImageDir,fileName)])
@@ -80,7 +91,7 @@ def unInterleaveSignal(signal, numSlices, interleaveFactor):
 resultsDir = simDirCluster+"/Results"
 
 for direction in range(numImages):
-	if motionAndEddyImages == "on":
+	if motionAndEddyImages == True:
 		simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(direction)
 		if interleaveFactor > 1:
 			signal = readSignal(simDirClusterDirectionMotionAndEddy+'/signal')
@@ -89,7 +100,7 @@ for direction in range(numImages):
 		else:
 			call(["cp",simDirClusterDirectionMotionAndEddy+'/signal',simDirClusterDirectionMotionAndEddy+'/signalUninterleaved'])
 
-	if normalImages == "on":
+	if normalImages == True:
 		simDirClusterDirection = simDirCluster+"/Direction"+str(direction)
 		if interleaveFactor > 1:
 			signal = readSignal(simDirClusterDirection+'/signal')
@@ -100,25 +111,25 @@ for direction in range(numImages):
 
 	#Generate noise
 	for sigma in noiseLevel:
-		if normalImages == "on":
+		if normalImages == True:
 			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirection+"/signalUninterleaved","-o",simDirClusterDirection+"/signalNoise"])
 			call(["signal2image","-i",simDirClusterDirection+"/signalNoise","-p",simDirClusterDirection+"/pulse","-o",simDirClusterDirection+"/imageNoise","-a"])
 
 
-		if motionAndEddyImages == "on":
+		if motionAndEddyImages == True:
 			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirectionMotionAndEddy+"/signalUninterleaved","-o",simDirClusterDirectionMotionAndEddy+"/signalNoise"])
 			call(["signal2image","-i",simDirClusterDirectionMotionAndEddy+"/signalNoise","-p",simDirClusterDirectionMotionAndEddy+"/pulse","-o",simDirClusterDirectionMotionAndEddy+"/imageNoise","-a"])
 
 		#Save
-		if motionAndEddyImages == "on":
+		if motionAndEddyImages == True:
 			saveNoiseyImage(simDirClusterDirectionMotionAndEddy,resultsDir,"diff+eddy+motion_sigma{}_image{}.nii.gz".format(sigma,direction))
 			convertImageToFloat(resultsDir,"diff+eddy+motion_sigma{}_image{}.nii.gz".format(sigma,direction))
-		if normalImages == "on":
+		if normalImages == True:
 			saveNoiseyImage(simDirClusterDirection,resultsDir,"diff_sigma{}_image{}.nii.gz".format(sigma,direction))
 			convertImageToFloat(resultsDir,"diff_sigma{}_image{}.nii.gz".format(sigma,direction))
 
 #Merge
-if motionAndEddyImages == "on":
+if motionAndEddyImages == True:
 	for sigma in noiseLevel:
 		callMergeNoise = "fslmerge -a " + resultsDir + "/diff+eddy+motion_sigma{} ".format(sigma)
 		callDelNoise = "rm "
@@ -129,7 +140,7 @@ if motionAndEddyImages == "on":
 		os.system(callDelNoise)
 
 
-if normalImages == "on":
+if normalImages == True:
 	for sigma in noiseLevel:
 		callMergeNoise = "fslmerge -a " + resultsDir + "/diff_sigma{} ".format(sigma)
 		callDelNoise = "rm "

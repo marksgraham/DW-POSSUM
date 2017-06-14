@@ -11,17 +11,17 @@ DW-POSSUM is run in three stages. First all the files required for the simulatio
 
 1. Generate required files 
 ```bash
-python generatedFileStructure.py
+python generateFileStructure.py Files/POSSUMdirectories/possumSimdirOneSlice/ Test/ Files/Bvalsbvecs/bvalsfmrib Files/Bvalsbvecs/bvecsfmrib --num_images 3
 ```
 
 2. Run POSSUM
 ```bash
-python runPossum.py
+python runPossum.py Test 3
 ```
 
 3. Tidy up
 ```bash
-python postProcess.py
+postProcess.py Test 3 --noise_levels 0 0.0081 0.0165
 ```
 Your simulations will be stored as 4D nifti files in Test/Results/
 

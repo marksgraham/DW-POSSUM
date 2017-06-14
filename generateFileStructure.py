@@ -14,42 +14,48 @@ import argparse
 #Parse arguments
 parser = argparse.ArgumentParser(description="Setup all the files required to run the simulations.")
 
-parser.add_argument("possum_dir")
-parser.add_argument("output_dir")
-parser.add_argument("bvals")
-parser.add_argument("bvecs")
+parser.add_argument("possum_dir",help="Path to the possum simulation directory.")
+parser.add_argument("output_dir",help="Path to output directory.")
+parser.add_argument("bvals",help="Path to bval file.")
+parser.add_argument("bvecs",help="Path to bvec file.")
+parser.add_argument("--num_images",help='Number of volumes. Defaults to number of entries in bval file.',type=int)
+parser.add_argument("--motion_dir",help='Path to directory describing subject motion.')
+parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
+parser.add_argument("--generate_distorted",help='Generate datasets with eddy-current and motion artefacts. Default=False',action="store_true",default=0)
 
 args=parser.parse_args()
 
-simDir = os.path.abspath(possum_dir)
-outputDirList = [output_dir];
+#Check arguments and setup paths
+simDir = os.path.abspath(args.possum_dir)
+outputDirList = [args.output_dir]
+bvalDirList = [args.bvals]
+bvecDirList = [args.bvecs]
+#Check bval entries
+bvals, bvecs = read_bvals_bvecs(
+		args.bvals, 
+		args.bvecs)
 
-print(args.possum_dir)
+#Check num_images
+num_bvals = len(bvals)
+if args.num_images:
+	numImagesList= [args.num_images]
+	if numImagesList[0] > num_bvals:
+		print("Warning: num_images cannot be greater than the number of entries in the bval file. Setting to this maximum.")
+		numImagesList[0] = num_bvals
+else:
+	numImagesList= [num_bvals]
 
-################Check the following are correct before running#################
-# #Set relevant simulation directories:
-# simDir = os.path.abspath('Files/POSSUMdirectories/possumSimdirOneSlice/')
+if args.motion_dir == 0:
+		motionDir=['None']
+else:
+	motionDir = [args.motion_dir]
 
-# #set output directory
-# outputDirList = ['Test/'];
 
-# #Load in bvecs, bvals
-# bvalDirList = ['Files/Bvalsbvecs/bvalsfmrib']
-# bvecDirList = ['Files/Bvalsbvecs/bvecsfmrib']
+normalImages = args.generate_artefact_free
+motionAndEddyImages = args.generate_distorted
 
-# #Choose number of images to generate (must be <= length of bval file)
-# numImagesList=[3];
 
-# #Choose motion directory
-# motionDir = ['None']
 
-# #Choose whether to keep artefact-free images
-# normalImages = "on";
-
-# #Choose whether to generate distorted images
-# motionAndEddyImages = "off";
-
-###############################################################################
 #Choose segmentation
 #segName = 'HCP_seg_downsampled_clipped.nii.gz' 
 segName = 'HCP_seg_clipped.nii.gz'
@@ -82,7 +88,7 @@ coefficientsb1000 = coefficientsNiib1000.get_data()
 
 coefficientsNiib2000 = nib.load(os.path.join(
 	'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
-coefficientsb2000 = coefficientsNiib2000.get_data()
+#coefficientsb2000 = coefficientsNiib2000.get_data()
 
 for dirNum, outputDir in enumerate(outputDirList):
 
@@ -172,7 +178,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 			call(["flirt","-in",simDirClusterDirection+ "/brain.nii.gz","-ref",simDirCluster+ "/brainref.nii.gz","-applyxfm","-out",simDirClusterDirection+ "/brain.nii.gz"])
 
 			#Apply motion to brain here
-			if motionAndEddyImages == "on":
+			if motionAndEddyImages == True:
 				simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(index)
 				call(["cp","-r",simDirClusterDirection,simDirClusterDirectionMotionAndEddy])
 				if motionDir is not "None":
@@ -192,7 +198,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 
 
-			if normalImages == "off":
+			if normalImages == False:
 				call(["rm","-rf", simDirClusterDirection])
 
 
