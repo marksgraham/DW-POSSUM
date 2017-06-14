@@ -9,30 +9,45 @@ import nibabel as nib
 import possumLib as pl
 import numpy as np
 import scipy.io
+import argparse
 
+#Parse arguments
+parser = argparse.ArgumentParser(description="Setup all the files required to run the simulations.")
+
+parser.add_argument("possum_dir")
+parser.add_argument("output_dir")
+parser.add_argument("bvals")
+parser.add_argument("bvecs")
+
+args=parser.parse_args()
+
+simDir = os.path.abspath(possum_dir)
+outputDirList = [output_dir];
+
+print(args.possum_dir)
 
 ################Check the following are correct before running#################
-#Set relevant simulation directories:
-simDir = os.path.abspath('Files/POSSUMdirectories/possumSimdirOneSlice/')
+# #Set relevant simulation directories:
+# simDir = os.path.abspath('Files/POSSUMdirectories/possumSimdirOneSlice/')
 
-#set output directory
-outputDirList = ['Test/'];
+# #set output directory
+# outputDirList = ['Test/'];
 
-#Load in bvecs, bvals
-bvalDirList = ['bvalsfmrib']
-bvecDirList = ['bvecsfmrib']
+# #Load in bvecs, bvals
+# bvalDirList = ['Files/Bvalsbvecs/bvalsfmrib']
+# bvecDirList = ['Files/Bvalsbvecs/bvecsfmrib']
 
-#Choose number of images to generate (must be <= length of bval file)
-numImagesList=[3];
+# #Choose number of images to generate (must be <= length of bval file)
+# numImagesList=[3];
 
-#Choose motion directory
-motionDir = ['None']
+# #Choose motion directory
+# motionDir = ['None']
 
-#Choose whether to keep artefact-free images
-normalImages = "on";
+# #Choose whether to keep artefact-free images
+# normalImages = "on";
 
-#Choose whether to generate distorted images
-motionAndEddyImages = "off";
+# #Choose whether to generate distorted images
+# motionAndEddyImages = "off";
 
 ###############################################################################
 #Choose segmentation
@@ -72,8 +87,8 @@ coefficientsb2000 = coefficientsNiib2000.get_data()
 for dirNum, outputDir in enumerate(outputDirList):
 
 	bvals, bvecs = read_bvals_bvecs(
-		'Files/Bvalsbvecs/'+bvalDirList[dirNum], 
-		'Files/Bvalsbvecs/'+bvecDirList[dirNum])
+		bvalDirList[dirNum], 
+		bvecDirList[dirNum])
 	print bvals
 	print bvecs
 	print outputDir
