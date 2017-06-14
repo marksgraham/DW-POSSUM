@@ -18,7 +18,7 @@ def saveNoiseyImage(simDir,saveImageDir,fileName):
 ################################### CHECK THIS PART ###########################################################
 #Choose relevant directories:
 simDirCluster = os.path.abspath('Test/')
-numImages = 2
+numImages = 3
 normalImages = "on"
 eddyImages = "off" #on or off
 motionImages = "off"
