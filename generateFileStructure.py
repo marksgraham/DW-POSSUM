@@ -72,8 +72,8 @@ coefficientsb2000 = coefficientsNiib2000.get_data()
 for dirNum, outputDir in enumerate(outputDirList):
 
 	bvals, bvecs = read_bvals_bvecs(
-		'Files/bvalsbvecs/'+bvalDirList[dirNum], 
-		'Files/bvalsbvecs/'+bvecDirList[dirNum])
+		'Files/Bvalsbvecs/'+bvalDirList[dirNum], 
+		'Files/Bvalsbvecs/'+bvecDirList[dirNum])
 	print bvals
 	print bvecs
 	print outputDir
