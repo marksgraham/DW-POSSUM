@@ -26,14 +26,7 @@ simDirCluster = os.path.abspath(args.simulation_dir)
 numImages = args.num_images
 normalImages = args.simulate_artefact_free
 motionAndEddyImages = args.simulate_distorted
-
-print args.noise_levels
-
 noiseLevel = args.noise_levels
-
-for sigma in noiseLevel:
-	print sigma
-
 interleaveFactor = args.interleave_factor
 
 
@@ -131,7 +124,7 @@ for direction in range(numImages):
 #Merge
 if motionAndEddyImages == True:
 	for sigma in noiseLevel:
-		callMergeNoise = "fslmerge -a " + resultsDir + "/diff+eddy+motion_sigma{} ".format(sigma)
+		callMergeNoise = "fslmerge -t " + resultsDir + "/diff+eddy+motion_sigma{} ".format(sigma)
 		callDelNoise = "rm "
 		for i in range(numImages):
 			callMergeNoise += resultsDir + "/diff+eddy+motion_sigma{}_image{}.nii.gz ".format(sigma,i)
@@ -142,7 +135,7 @@ if motionAndEddyImages == True:
 
 if normalImages == True:
 	for sigma in noiseLevel:
-		callMergeNoise = "fslmerge -a " + resultsDir + "/diff_sigma{} ".format(sigma)
+		callMergeNoise = "fslmerge -t " + resultsDir + "/diff_sigma{} ".format(sigma)
 		callDelNoise = "rm "
 		for i in range(numImages):
 			callMergeNoise += resultsDir + "/diff_sigma{}_image{}.nii.gz ".format(sigma,i)
