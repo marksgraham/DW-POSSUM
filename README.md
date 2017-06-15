@@ -21,7 +21,7 @@ python runPossum.py Test 3
 
 3. Tidy up
 ```bash
-postProcess.py Test 3 --noise_levels 0 0.0081 0.0165
+python postProcess.py Test 3 --noise_levels 0 0.0081 0.0165
 ```
 Your simulations will be stored as 4D nifti files in Test/Results/
 
