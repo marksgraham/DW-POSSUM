@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #Code to generate a full shell of diffusion-weighted, eddy distorted images using FSL's possum, along with data that can be used to
 #establish a ground truth.
 

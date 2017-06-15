@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #Code to generate weighted, high resolution segmentations
 import os
 from subprocess import call
