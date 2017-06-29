@@ -1,9 +1,12 @@
 This code enables the simulation of DW-MR data using the POSSUM simulator.
 
+### Dependencies
+* [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
+* Python 2.x with [dipy](http://nipy.org/dipy/), [nibabel](http://nipy.org/nibabel/), numpy and scipy
+
 ### Setup
-1. Make sure you have [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation) installed 
-2. Clone this repository 
-3. Run `bash getFiles.sh` to download the imaging data
+1. Clone this repository 
+2. Run `bash getFiles.sh` to download the imaging data
 
 
 ### Tutorial
