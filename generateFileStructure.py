@@ -84,21 +84,26 @@ segmentedBrain, segmentedBrainData = pl.loadSegData('Files/Segmentations',segNam
 
 #Load in spherical harmonic coefficients
 order = 8;
-coefficientsNiib1000 = nib.load(os.path.join('Files/SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
-coefficientsb1000 = coefficientsNiib1000.get_data()	
 
-coefficientsNiib2000 = nib.load(os.path.join(
+if any(bval > 100 and bval < 1500 for bval in bvals):
+	print('Loading b=1000 spherical harmonics')
+	coefficientsNiib1000 = nib.load(os.path.join('Files/SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
+	coefficientsb1000 = coefficientsNiib1000.get_data()	
+if any(bval > 1500 and bval < 2500 for bval in bvals):
+	print('Loading b=2000 spherical harmonics')
+	coefficientsNiib2000 = nib.load(os.path.join(
 	'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
-#coefficientsb2000 = coefficientsNiib2000.get_data()
+	coefficientsb2000 = coefficientsNiib2000.get_data()
+if any(bval > 2500 for bval in bvals):
+	raise NotImplementedError('bvals > 2000 currently not supported')
 
 for dirNum, outputDir in enumerate(outputDirList):
 
 	bvals, bvecs = read_bvals_bvecs(
 		bvalDirList[dirNum], 
 		bvecDirList[dirNum])
-	print bvals
-	print bvecs
-	print outputDir
+	
+	print 'Output directory: ' + outputDir
 
 
 	#Make directory for cluster files
@@ -162,9 +167,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 				if bvals[index] < 1500:
 					attenuatedBrainData = pl.attenuateImageSphericalHarmonics (segmentedBrainData, B, coefficientsb1000, bvals[index], 1000)
 				elif  bvals[index] > 1500 and bvals[index] < 2500:
-					attenuatedBrainData = pl.attenuateImageSphericalHarmonics (segmentedBrainData, B, coefficientsb2000, bvals[index], 2000)
-				else:
-					print 'need to cater for higher bvals!'			
+					attenuatedBrainData = pl.attenuateImageSphericalHarmonics (segmentedBrainData, B, coefficientsb2000, bvals[index], 2000)		
 
 
 
