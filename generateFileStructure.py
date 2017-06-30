@@ -79,23 +79,29 @@ codeDir =  os.path.abspath('.')
 matlabDir = "/Applications/MATLAB_R2014b.app/bin/matlab"
 
 #Load in segmentations
+print('Loading segmentation...')
 segmentedBrain, segmentedBrainData = pl.loadSegData('Files/Segmentations',segName)
-
+print('Finished loading segmentation.')
 
 #Load in spherical harmonic coefficients
 order = 8;
 
+#Check for problems first
+if any(bval > 2500 for bval in bvals):
+	raise NotImplementedError('bvals > 2000 currently not supported')
+
 if any(bval > 100 and bval < 1500 for bval in bvals):
-	print('Loading b=1000 spherical harmonics')
+	print('Loading b=1000 spherical harmonics...')
 	coefficientsNiib1000 = nib.load(os.path.join('Files/SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
 	coefficientsb1000 = coefficientsNiib1000.get_data()	
+	print('Finished loading b=1000 spherical harmonics.')
 if any(bval > 1500 and bval < 2500 for bval in bvals):
-	print('Loading b=2000 spherical harmonics')
+	print('Loading b=2000 spherical harmonics...')
 	coefficientsNiib2000 = nib.load(os.path.join(
 	'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
 	coefficientsb2000 = coefficientsNiib2000.get_data()
-if any(bval > 2500 for bval in bvals):
-	raise NotImplementedError('bvals > 2000 currently not supported')
+	print('Finished loading b=2000 spherical harmonics.')
+
 
 for dirNum, outputDir in enumerate(outputDirList):
 
@@ -164,6 +170,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 				B, m, n = shm.real_sym_sh_basis(order, theta, phi)
 				
 				#Get attenuated data
+				print('Attenuating volume ' + str(index))
 				if bvals[index] < 1500:
 					attenuatedBrainData = pl.attenuateImageSphericalHarmonics (segmentedBrainData, B, coefficientsb1000, bvals[index], 1000)
 				elif  bvals[index] > 1500 and bvals[index] < 2500:
@@ -179,6 +186,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 			call(["mv",codeDir + "/attenuatedBrainPy.nii.gz", simDirClusterDirection+ "/brain.nii.gz"])
 
 			#Register to reference brain to get sizes right
+			print('Registering volume ' + str(index))
 			call(["flirt","-in",simDirClusterDirection+ "/brain.nii.gz","-ref",simDirCluster+ "/brainref.nii.gz","-applyxfm","-out",simDirClusterDirection+ "/brain.nii.gz"])
 
 			#Apply motion to brain here
