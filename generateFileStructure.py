@@ -11,6 +11,7 @@ import possumLib as pl
 import numpy as np
 import scipy.io
 import argparse
+import shutil
 
 #Parse arguments
 parser = argparse.ArgumentParser(description="Setup all the files required to run the simulations.")
@@ -46,7 +47,7 @@ if args.num_images:
 else:
 	numImagesList= [num_bvals]
 
-if args.motion_dir == 0:
+if args.motion_dir == None:
 		motionDir=['None']
 else:
 	motionDir = [args.motion_dir]
@@ -114,19 +115,19 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 	#Make directory for cluster files
 	simDirCluster=outputDir
-	call(["mkdir",simDirCluster])
-	call(["mkdir",simDirCluster+"/Results"])
-	call(["mkdir",simDirCluster+"/Distortions"])
-	call(["mkdir",simDirCluster+"/Distortions/Motion"])
-	call(["mkdir",simDirCluster+"/Distortions/Eddy"])
+	pl.makeFolder(simDirCluster)
+	pl.makeFolder(simDirCluster+"/Results")
+	pl.makeFolder(simDirCluster+"/Distortions")
+	pl.makeFolder(simDirCluster+"/Distortions/Motion")
+	pl.makeFolder(simDirCluster+"/Distortions/Eddy")
 	pl.initialise(simDir,codeDir)
 	if motionAndEddyImages == "on":
-		call(["cp", "-r", motionDir[dirNum], simDirCluster+"/Distortions/Motion"])
-		call(["cp",simDir+"/pulse",simDirCluster+"/Distortions/Eddy"])
+		shutil.copytree(motionDir[dirNum], simDirCluster+"/Distortions/Motion")
+		shutil.copy(simDir+"/pulse",simDirCluster+"/Distortions/Eddy")
 
 
 	#Move ref brain for registering
-	call(["cp",simDir+"/brainref.nii.gz", simDirCluster])
+	shutil.copy(simDir+"/brainref.nii.gz", simDirCluster)
 
 
 	for index, bvec in enumerate(bvecs[0:numImagesList[dirNum]]):
@@ -136,17 +137,17 @@ for dirNum, outputDir in enumerate(outputDirList):
 		else:
 			#Make directory for each setting
 			simDirClusterDirection = simDirCluster+"/Direction"+str(index)
-			call(["mkdir", simDirClusterDirection])
+			pl.makeFolder(simDirClusterDirection)
 			#Copy needed files to folder
-			call(["cp",simDir+"/MRpar",simDirClusterDirection])
-			call(["cp",simDir+"/motion",simDirClusterDirection])
-			call(["cp",simDir+"/slcprof",simDirClusterDirection])
-			call(["cp",simDir+"/pulse.info",simDirClusterDirection])
-			call(["cp",simDir+"/pulse.readme",simDirClusterDirection])
-			call(["cp",simDir+"/pulse.posx",simDirClusterDirection])
-			call(["cp",simDir+"/pulse.posy",simDirClusterDirection])
-			call(["cp",simDir+"/pulse.posz",simDirClusterDirection])
-			call(["cp",simDir+"/pulse",simDirClusterDirection])
+			shutil.copy(simDir+"/MRpar",simDirClusterDirection)
+			shutil.copy(simDir+"/motion",simDirClusterDirection)
+			shutil.copy(simDir+"/slcprof",simDirClusterDirection)
+			shutil.copy(simDir+"/pulse.info",simDirClusterDirection)
+			shutil.copy(simDir+"/pulse.readme",simDirClusterDirection)
+			shutil.copy(simDir+"/pulse.posx",simDirClusterDirection)
+			shutil.copy(simDir+"/pulse.posy",simDirClusterDirection)
+			shutil.copy(simDir+"/pulse.posz",simDirClusterDirection)
+			shutil.copy(simDir+"/pulse",simDirClusterDirection)
 			
 
 			#Get attenuated segmentations
@@ -183,7 +184,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 			attenuatedBrainNii.to_filename(os.path.join(codeDir,'attenuatedBrainPy.nii.gz'))
 
-			call(["mv",codeDir + "/attenuatedBrainPy.nii.gz", simDirClusterDirection+ "/brain.nii.gz"])
+			shutil.move(codeDir + "/attenuatedBrainPy.nii.gz", simDirClusterDirection+ "/brain.nii.gz")
 
 			#Register to reference brain to get sizes right
 			print('Registering volume ' + str(index))
@@ -192,9 +193,9 @@ for dirNum, outputDir in enumerate(outputDirList):
 			#Apply motion to brain here
 			if motionAndEddyImages == True:
 				simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(index)
-				call(["cp","-r",simDirClusterDirection,simDirClusterDirectionMotionAndEddy])
-				if motionDir is not "None":
-					call(["cp", motionDir[dirNum] + "/motion" + str(index) + '.txt', simDirClusterDirectionMotionAndEddy+ "/motion"  ])
+				shutil.copytree(simDirClusterDirection,simDirClusterDirectionMotionAndEddy)
+				if motionDir[dirNum] is not "None":
+					shutil.copy(motionDir[dirNum] + "/motion" + str(index) + '.txt', simDirClusterDirectionMotionAndEddy+ "/motion")
 
 				
 				#Make distorted eddy pulse
@@ -205,13 +206,13 @@ for dirNum, outputDir in enumerate(outputDirList):
 					pl.addEddyAccordingToBvec(basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
 
 				#Move eddy distorted pulse to simdir
-				call(["mv",codeDir + "/pulse_new", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse"])
-				call(["cp", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse", simDirCluster+"/Distortions/Eddy/pulseEddy"+str(index)])
+				shutil.move(codeDir + "/pulse_new", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse")
+				shutil.copy(simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse", simDirCluster+"/Distortions/Eddy/pulseEddy"+str(index))
 
 
 
 			if normalImages == False:
-				call(["rm","-rf", simDirClusterDirection])
+				shutil.rmtree(simDirClusterDirection)
 
 
 	#Tidy up:

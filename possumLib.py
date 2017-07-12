@@ -138,6 +138,8 @@ def read_pulse(fname):
     dummy=np.fromfile(fid, dtype=np.uint32,count = 1)
     nrows=np.fromfile(fid, dtype=np.uint32,count = 1)
     ncols=np.fromfile(fid, dtype=np.uint32,count = 1)
+    nrows= int(nrows)
+    ncols= int(ncols)
 
     time=np.fromfile(fid, dtype=np.float64,count = nrows)
     mvals = np.fromfile(fid, dtype=np.float32, count = nrows*(ncols-1))
@@ -217,3 +219,7 @@ def addEddyAccordingToBvec(tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
     new_pulse[:,6]=pulse[:,6] + np.sum(Eddyy,0).T
     new_pulse[:,7]=pulse[:,7] + np.sum(Eddyz,0).T
     write_pulse("pulse_new",new_pulse)
+
+def makeFolder(directory):
+  if not os.path.exists(directory):
+    os.makedirs(directory)
