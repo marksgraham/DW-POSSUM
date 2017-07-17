@@ -22,6 +22,8 @@ parser.add_argument("bvals",help="Path to bval file.")
 parser.add_argument("bvecs",help="Path to bvec file.")
 parser.add_argument("--num_images",help='Number of volumes. Defaults to number of entries in bval file.',type=int)
 parser.add_argument("--motion_dir",help='Path to directory describing subject motion.')
+parser.add_argument("--brain",help='Path to POSSUM input object.')
+parser.add_argument("--brain_diffusion",help='Path to directory containing spherical harmonic coefficients for input object.')
 parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
 parser.add_argument("--generate_distorted",help='Generate datasets with eddy-current and motion artefacts. Default=False',action="store_true",default=0)
 
@@ -52,16 +54,18 @@ if args.motion_dir == None:
 else:
 	motionDir = [args.motion_dir]
 
+if args.brain== None:
+		segName = 'Files/Segmentations/HCP_seg_clipped.nii.gz'
+else:
+	segName  = args.brain
+
+if args.brain_diffusion== None:
+	sharm_dir = 'Files/SphericalHarmonics'
+else:
+	sharm_dir  = args.brain_diffusion
 
 normalImages = args.generate_artefact_free
 motionAndEddyImages = args.generate_distorted
-
-
-
-#Choose segmentation
-#segName = 'HCP_seg_downsampled_clipped.nii.gz' 
-segName = 'HCP_seg_clipped.nii.gz'
-
 
 #Set eddy current distortion parameters
 ep =0.006 #default is 0.006
@@ -81,7 +85,7 @@ matlabDir = "/Applications/MATLAB_R2014b.app/bin/matlab"
 
 #Load in segmentations
 print('Loading segmentation...')
-segmentedBrain, segmentedBrainData = pl.loadSegData('Files/Segmentations',segName)
+segmentedBrain, segmentedBrainData = pl.loadSegData(segName)
 print('Finished loading segmentation.')
 
 #Load in spherical harmonic coefficients
@@ -93,13 +97,12 @@ if any(bval > 2500 for bval in bvals):
 
 if any(bval > 100 and bval < 1500 for bval in bvals):
 	print('Loading b=1000 spherical harmonics...')
-	coefficientsNiib1000 = nib.load(os.path.join('Files/SphericalHarmonics/coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
+	coefficientsNiib1000 = nib.load(os.path.join(sharm_dir,'coefficientsUpsampledb1000n'+str(order)+'.nii.gz'))
 	coefficientsb1000 = coefficientsNiib1000.get_data()	
 	print('Finished loading b=1000 spherical harmonics.')
 if any(bval > 1500 and bval < 2500 for bval in bvals):
 	print('Loading b=2000 spherical harmonics...')
-	coefficientsNiib2000 = nib.load(os.path.join(
-	'Files/SphericalHarmonics/coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
+	coefficientsNiib2000 = nib.load(os.path.join(sharm_dir,'coefficientsUpsampledb2000n'+str(order)+'.nii.gz'))
 	coefficientsb2000 = coefficientsNiib2000.get_data()
 	print('Finished loading b=2000 spherical harmonics.')
 

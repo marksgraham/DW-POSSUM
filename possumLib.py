@@ -94,8 +94,8 @@ def saveImage(simDir,saveImageDir,fileName):
   call(["mv", simDir + "/image_abs.nii.gz", os.path.join(saveImageDir,fileName)])
 
 #Load in segmented brain used for possum
-def loadSegData(templateDir,segmentedName):
-  segmentedBrain = nib.load(os.path.join(templateDir,segmentedName))
+def loadSegData(seg_path):
+  segmentedBrain = nib.load(seg_path)
   segmentedBrainData = segmentedBrain.get_data()
   return segmentedBrain, segmentedBrainData
 
