@@ -18,6 +18,7 @@ if [ $# -eq 0 ]
 	unzip -nx -d Files/POSSUMdirectories/ possumtest.zip -x /
 	mv  HCP_seg_clipped.nii.gz  Files/Segmentations/
 	mv coefficientsUpsampledb1000n8.nii.gz Files/SphericalHarmonics/
+	mv coefficientsUpsampledb2000n8.nii.gz Files/SphericalHarmonics/
 	mv csf_coeff_b1000.npy Files/SphericalHarmonics/
 	mv csf_coeff_b2000.npy Files/SphericalHarmonics/
 
