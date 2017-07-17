@@ -8,6 +8,8 @@ if [ $# -eq 0 ]
 	curl -L -o HCP_seg_clipped.nii.gz https://www.dropbox.com/s/q9esf1vbazkv3q9/HCP_seg_clipped.nii.gz?dl=1
 	curl -L -o coefficientsUpsampledb1000n8.nii.gz https://www.dropbox.com/s/8jxvo081m1ahfsw/coefficientsUpsampledb1000n8.nii.gz?dl=1
 	curl -L -o coefficientsUpsampledb2000n8.nii.gz https://www.dropbox.com/s/4mpl9csws3ln1sd/coefficientsUpsampledb2000n8.nii.gz?dl=1
+	curl -L -o csf_coeff_b1000.npy https://www.dropbox.com/s/let79ssf2odr7mc/csf_coeff_b1000.npy?dl=1
+	curl -L -o csf_coeff_b2000.npy https://www.dropbox.com/s/let79ssf2odr7mc/csf_coeff_b2000.npy?dl=1
 
 
 	#Move to correct location
@@ -16,7 +18,8 @@ if [ $# -eq 0 ]
 	unzip -nx -d Files/POSSUMdirectories/ possumtest.zip -x /
 	mv  HCP_seg_clipped.nii.gz  Files/Segmentations/
 	mv coefficientsUpsampledb1000n8.nii.gz Files/SphericalHarmonics/
-	mv coefficientsUpsampledb2000n8.nii.gz Files/SphericalHarmonics/
+	mv csf_coeff_b1000.npy Files/SphericalHarmonics/
+	mv csf_coeff_b2000.npy Files/SphericalHarmonics/
 
 fi
 
