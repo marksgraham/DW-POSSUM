@@ -172,7 +172,7 @@ for bvalue in (1000,2000):
     maskImg = nib.load(maskDir)
     maskData = maskImg.get_data()
     bvals, bvecs = read_bvals_bvecs(bvalDir, bvecDir)
-    gtab = gradient_table(bvals, bvecs)
+    gtab = gradient_table(bvals, bvecs,b0_threshold=50)
 
     # Normalise data
     dataNormalised = shm.normalize_data(data, gtab.b0s_mask)
