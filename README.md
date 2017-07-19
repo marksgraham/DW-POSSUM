@@ -28,4 +28,11 @@ DW-POSSUM is run in three stages. First all the files required for the simulatio
 ```
 Your simulations will be stored as 4D nifti files in Test/Results/
 
+### References
+
+If you use DW-POSSUM in your research, please cite both the POSSUM and DW-POSSUM papers:
+
+- Ivana Drobnjak, David Gavaghan, Endre Süli, Joe Pitt-Francis and Mark Jenkinson. Development of a functional magnetic resonance imaging simulator for modeling realistic rigid-body motion artifacts, MRM 56 364–380, 2006.
+- Mark S. Graham, Ivana Drobnjak and Hui Zhang. Realistic simulation of artefacts in diffusion MRI for validating post-processing correction techniques, NeuroImage 125, 1079-1094, 2016.
+
 
