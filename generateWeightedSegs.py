@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 #Code to generate weighted, high resolution segmentations
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 from subprocess import call
 from dipy.io import read_bvals_bvecs
@@ -57,9 +61,9 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 	bvals, bvecs = read_bvals_bvecs(bvalDirList[dirNum], 
 		bvecDirList[dirNum])
-	print bvals
-	print bvecs
-	print outputDir
+	print(bvals)
+	print(bvecs)
+	print(outputDir)
 
 
 	#Make directory for cluster files
@@ -92,7 +96,7 @@ for dirNum, outputDir in enumerate(outputDirList):
 				elif  bvals[index] > 1500 and bvals[index] < 2500:
 					attenuatedBrainData = pl.attenuateImageSphericalHarmonics (segmentedBrainData, B, coefficientsb2000, bvals[index], 2000)
 				else:
-					print 'need to cater for higher bvals!'			
+					print('need to cater for higher bvals!')			
 
 
 

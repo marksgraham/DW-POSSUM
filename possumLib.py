@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from subprocess import call
 import numpy as np
 import os
@@ -62,7 +66,7 @@ def attenuateImage(image,tensor,bval, bvec):
    # implot=plt.imshow(img.squeeze())
    # plt.colorbar()
     #plt.show()
-    attenuationMap = np.array([np.tile(attenuationMap, (1,1)) for i in xrange(3)]) 
+    attenuationMap = np.array([np.tile(attenuationMap, (1,1)) for i in range(3)]) 
     attenuationMap = np.transpose(attenuationMap,[1,2,3,0])
     attenuatedImage =  attenuationMap * image
     return attenuatedImage, attenuationMap
@@ -77,7 +81,7 @@ def attenuateImageSphericalHarmonics (image, B, coefficients,bval, bvalStandard)
         coeff = coefficients[i,j,k,:] 
         attenuationMap[i,j,k] = np.dot(B,coeff)
 
-  attenuationMap = np.array([np.tile(attenuationMap, (1,1)) for i in xrange(3)]) 
+  attenuationMap = np.array([np.tile(attenuationMap, (1,1)) for i in range(3)]) 
   attenuationMap = np.transpose(attenuationMap,[1,2,3,0])
 
   #Get rid of any negative values

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 #Generate POSSUM input object and spherical harmonic coefficients from an HCP dataset
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import argparse
 import os
@@ -56,7 +59,7 @@ pl.makeFolder(out+"/DiffusionReordered/b1000")
 pl.makeFolder(out+"/DiffusionReordered/b2000")
 pl.makeFolder(out+"/DiffusionReordered/b3000")
 
-print bvecs.shape
+print(bvecs.shape)
 
 for index, bval in enumerate(bvals):
 	if bval < 100:
@@ -252,7 +255,7 @@ for bvalue in (1000,2000):
     #csf_coeffs_rep = coeffNii.dataobj[84, 36, 66, :]
     #np.save('Files/SphericalHarmonics/csf_coeff_b'+str(bvalue),csf_coeffs_rep)
     csf_coeffs_rep = 0.65 * np.load('Files/SphericalHarmonics/csf_coeff_b'+str(bvalue)+'.npy')
-    print csf_coeffs_rep
+    print(csf_coeffs_rep)
 
     for i in range(0, segUpsampledData.shape[0]):
         for j in range(0, segUpsampledData.shape[1]):
