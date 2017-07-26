@@ -9,8 +9,8 @@ This code enables the simulation of DW-MR data using the POSSUM simulator.
 2. Run `bash getFiles.sh` to download the imaging data
 
 
-### Tutorial
-DW-POSSUM is run in three stages. First all the files required for the simulation are generated (generateFileStructure.py). Then the simulations are run (runPossum.py). Finally everything is tidied up (postProcess.py).
+### Quick-start tutorial
+DW-POSSUM is run in three stages. First all the files required for the simulation are generated (generateFileStructure.py). Then the simulations are run (runPossum.py). Finally everything is tidied up (postProcess.py). The following commands will simulate the acquistion of a single slice for the first three entries in the bval/bvec file supplied (two b=0 and one b=1000 volumes).
 
 1. Generate required files 
 ```bash
@@ -26,7 +26,9 @@ DW-POSSUM is run in three stages. First all the files required for the simulatio
 ```bash
 ./postProcess.py Test 3 --noise_levels 0 0.0081 0.0165
 ```
-Your simulations will be stored as 4D nifti files in Test/Results/
+Your simulations will be stored as 4D nifti files in Test/Results/. 
+
+Documentation for each command can be found using the -h flag. 
 
 ### References
 
