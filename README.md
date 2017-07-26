@@ -30,6 +30,11 @@ Your simulations will be stored as 4D nifti files in Test/Results/.
 
 Documentation for each command can be found using the -h flag. 
 
+### Computationalal requirements
+
+* generateFileStructure.py is fairly memory hungry - it may require up to 16GB RAM. 
+* runPossum.py is where the meat of the simulation happens, and is very CPU intensive. Under the hood, it calls the FSL command possumX. For large simulations (i.e. anything more than a few slices of the brain) I recommend running this on a cluster environment that has been set up for automatic self-submission of FSL jobs (more information [here](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/SGE%20submission%20FAQ)). This will automatically divide each simulation into a number of jobs (the number can be set using the --num_processors flag), submit each to the cluster and handle recombination into the final image volume.
+
 ### References
 
 If you use DW-POSSUM in your research, please cite both the POSSUM and DW-POSSUM papers:
