@@ -4,6 +4,11 @@
 #Mac specific
 .DS_Store
 
+#DW-POSSUM specific folders
+Files/POSSUMdirectories/
+Files/Segmentations/
+Files/SphericalHarmonics/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
