@@ -17,6 +17,15 @@ import argparse
 import shutil
 
 #Parse arguments
+def str2bool(v):
+	#Function allows boolean arguments to take a wider variety of inputs
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description="Setup all the files required to run the simulations.")
 
 parser.add_argument("possum_dir",help="Path to the possum simulation directory.")
@@ -27,10 +36,12 @@ parser.add_argument("--num_images",help='Number of volumes. Defaults to number o
 parser.add_argument("--motion_dir",help='Path to directory describing subject motion.')
 parser.add_argument("--brain",help='Path to POSSUM input object.')
 parser.add_argument("--brain_diffusion",help='Path to directory containing spherical harmonic coefficients for input object.')
-parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
-parser.add_argument("--generate_distorted",help='Generate datasets with eddy-current and motion artefacts. Default=False',action="store_true",default=0)
+#parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
+parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.', type=str2bool, nargs='?',const=True,default=True)
+parser.add_argument("--generate_distorted",help='Generate datasets with eddy-current and motion artefacts. Default=False', type=str2bool, nargs='?',const=True,default=False)
 
 args=parser.parse_args()
+print(args.generate_artefact_free,args.generate_distorted)
 
 #Check arguments and setup paths
 simDir = os.path.abspath(args.possum_dir)
