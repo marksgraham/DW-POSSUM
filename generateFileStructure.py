@@ -36,12 +36,10 @@ parser.add_argument("--num_images",help='Number of volumes. Defaults to number o
 parser.add_argument("--motion_dir",help='Path to directory describing subject motion.')
 parser.add_argument("--brain",help='Path to POSSUM input object.')
 parser.add_argument("--brain_diffusion",help='Path to directory containing spherical harmonic coefficients for input object.')
-#parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
 parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.', type=str2bool, nargs='?',const=True,default=True)
 parser.add_argument("--generate_distorted",help='Generate datasets with eddy-current and motion artefacts. Default=False', type=str2bool, nargs='?',const=True,default=False)
 
 args=parser.parse_args()
-print(args.generate_artefact_free,args.generate_distorted)
 
 #Check arguments and setup paths
 simDir = os.path.abspath(args.possum_dir)
@@ -95,7 +93,6 @@ eddyGradients = 'decaying'; #Flat or decaying
 
 #Set directories
 codeDir =  os.path.abspath('.')
-matlabDir = "/Applications/MATLAB_R2014b.app/bin/matlab"
 
 #Load in segmentations
 print('Loading segmentation...')
@@ -137,7 +134,6 @@ for dirNum, outputDir in enumerate(outputDirList):
 	pl.makeFolder(simDirCluster+"/Distortions")
 	pl.makeFolder(simDirCluster+"/Distortions/Motion")
 	pl.makeFolder(simDirCluster+"/Distortions/Eddy")
-	pl.initialise(simDir,codeDir)
 	if motionAndEddyImages == "on":
 		shutil.copytree(motionDir[dirNum], simDirCluster+"/Distortions/Motion")
 		shutil.copy(simDir+"/pulse",simDirCluster+"/Distortions/Eddy")
@@ -214,17 +210,25 @@ for dirNum, outputDir in enumerate(outputDirList):
 				if motionDir[dirNum] is not "None":
 					shutil.copy(motionDir[dirNum] + "/motion" + str(index) + '.txt', simDirClusterDirectionMotionAndEddy+ "/motion")
 
-				
+				#Read in pulse
+				if index == 0:
+					print('reading pulse..')
+					pulse=pl.read_pulse(simDirClusterDirection+"/pulse")
+					pulseinfo = np.loadtxt(simDirClusterDirection+'/pulse.info')
+
 				#Make distorted eddy pulse
 				if eddyGradients=='flat':
 					pl.generateEddyPulseFromBvecFlat(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
 				else:
-					#pl.generateEddyPulseFromBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
-					pl.addEddyAccordingToBvec(basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
+					new_pulse = pl.addEddyAccordingToBvec(pulse,pulseinfo,basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
+
+				#Interleave 
+
+				#Save to correct location
+				pl.write_pulse(simDirClusterDirectionMotionAndEddy+"/pulse",new_pulse)
 
 				#Move eddy distorted pulse to simdir
-				shutil.move(codeDir + "/pulse_new", simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse")
-				shutil.copy(simDirCluster+"/DirectionMotionAndEddy"+str(index)+"/pulse", simDirCluster+"/Distortions/Eddy/pulseEddy"+str(index))
+				shutil.copy(simDirClusterDirectionMotionAndEddy+"/pulse", simDirCluster+"/Distortions/Eddy/pulseEddy"+str(index))
 
 
 
@@ -232,6 +236,4 @@ for dirNum, outputDir in enumerate(outputDirList):
 				shutil.rmtree(simDirClusterDirection)
 
 
-	#Tidy up:
-	pl.tidyUp(simDir,codeDir)
 

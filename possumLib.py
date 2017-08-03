@@ -10,22 +10,6 @@ import pdb
 import dipy.core.geometry as geom
 import math
 
-#Function copies some files needed by matlab from the simulation dir to the code dir, and saves backups of 
-#key files from the simulation dir
-def initialise(simDir, codeDir):
-  call(["cp", simDir + "/pulse", codeDir])
-  call(["cp", simDir + "/pulse.info", codeDir])
-  call(["cp",simDir + "/pulse", simDir + "/pulseOld"])
-  call(["cp",simDir + "/brain.nii.gz", simDir + "/brainOld.nii.gz"])
-
-#Function tidies up everything done by initialise after code has run
-def tidyUp(simDir,codeDir):
-  call(["rm", codeDir + "/pulse"])
-  call(["rm", codeDir + "/pulse.info"])
-  call(["mv",simDir + "/pulseOld", simDir + "/pulse"])
-  call(["mv",simDir + "/brainOld.nii.gz", simDir + "/brain.nii.gz"])
-
-
 # Function takes as input simDir, codeDir, matlabDir and set of eddy pulse features - saves -new_pulse to codeDir
 def generateEddyPulse(simDir,codeDir,matlabDir,bS, eS):
     str="addEddy({}, {}, {}, {}, {}, {}, {}, {}, {}, {});exit".format(bS[0],bS[1],bS[2],bS[3],eS[0],eS[1],eS[2],eS[3],eS[4],eS[5])
@@ -130,8 +114,6 @@ def makeRotMatrix(motionParams, simDirClusterDirection):
 def rotateBvecs(bvec, rotationAngles):
   #Rotates the bvecs before the attentuation is sampled, based on motion parameters, so that rotations adjust the diffusion contrast. Code rotates the brain around x, y then z sucessively, so this code rotates the bvec around z, y then x.
   rotMat = geom.euler_matrix(math.radians(rotationAngles[2]), math.radians(rotationAngles[1]), math.radians(rotationAngles[0]), 'szyx')
-
-  
   bvecRot = np.dot(rotMat[0:3,0:3],bvec)
   return bvecRot
 
@@ -170,12 +152,7 @@ def write_pulse(fname,mat):
     mvals.astype(np.float32).tofile(fidin)
     fidin.close()
 
-def addEddyAccordingToBvec(tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
-   #import ipdb; ipdb.set_trace()
-    #Extract pulse and pulse info - this should be in the directory
-    pulse=read_pulse("pulse")
-    pulseinfo = np.loadtxt('pulse.info')
-
+def addEddyAccordingToBvec(pulse,pulseinfo,tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
     #Quick hack to ensure eddy currents scale with b-value
     Gdiff=Gdiff * bval / 2000
 
@@ -222,7 +199,7 @@ def addEddyAccordingToBvec(tint,delta,Delta,Gdiff,ep,tau,bval,bvec):
     new_pulse[:,5]=pulse[:,5] + np.sum(Eddyx,0).T
     new_pulse[:,6]=pulse[:,6] + np.sum(Eddyy,0).T
     new_pulse[:,7]=pulse[:,7] + np.sum(Eddyz,0).T
-    write_pulse("pulse_new",new_pulse)
+    return new_pulse
 
 def makeFolder(directory):
   if not os.path.exists(directory):
