@@ -204,3 +204,20 @@ def addEddyAccordingToBvec(pulse,pulseinfo,tint,delta,Delta,Gdiff,ep,tau,bval,bv
 def makeFolder(directory):
   if not os.path.exists(directory):
     os.makedirs(directory)
+
+
+def interleavePulse(pulse, numSlices, interleaveFactor):
+  [nrows,ncols]=pulse.shape
+  pulseInterleaved = np.zeros((nrows,ncols))
+  pulseInterleaved[:,0] = pulse[:,0]
+  counter = 0
+  entriesPerSlice = int(nrows/numSlices)
+  for i in range(interleaveFactor):
+    for j in range(i,numSlices,interleaveFactor):
+      startIndexOld = counter* entriesPerSlice
+      endIndexOld = (counter + 1) * entriesPerSlice -1
+      startIndex = j* entriesPerSlice
+      endIndex = (j + 1) * entriesPerSlice -1
+      pulseInterleaved[startIndexOld:endIndexOld,1:] = pulse[startIndex:endIndex,1:]
+      counter = counter + 1
+  return pulseInterleaved

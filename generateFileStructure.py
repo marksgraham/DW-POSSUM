@@ -34,6 +34,7 @@ parser.add_argument("bvals",help="Path to bval file.")
 parser.add_argument("bvecs",help="Path to bvec file.")
 parser.add_argument("--num_images",help='Number of volumes. Defaults to number of entries in bval file.',type=int)
 parser.add_argument("--motion_dir",help='Path to directory describing subject motion.')
+parser.add_argument("--interleave_factor",help="Interleave factor for slice-acquistion. Default=1. ",type=int,default=1)
 parser.add_argument("--brain",help='Path to POSSUM input object.')
 parser.add_argument("--brain_diffusion",help='Path to directory containing spherical harmonic coefficients for input object.')
 parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.', type=str2bool, nargs='?',const=True,default=True)
@@ -75,7 +76,7 @@ if args.brain_diffusion== None:
 	sharm_dir = 'Files/SphericalHarmonics'
 else:
 	sharm_dir  = args.brain_diffusion
-
+interleaveFactor = args.interleave_factor
 normalImages = args.generate_artefact_free
 motionAndEddyImages = args.generate_distorted
 
@@ -212,7 +213,6 @@ for dirNum, outputDir in enumerate(outputDirList):
 
 				#Read in pulse
 				if index == 0:
-					print('reading pulse..')
 					pulse=pl.read_pulse(simDirClusterDirection+"/pulse")
 					pulseinfo = np.loadtxt(simDirClusterDirection+'/pulse.info')
 
@@ -223,13 +223,14 @@ for dirNum, outputDir in enumerate(outputDirList):
 					new_pulse = pl.addEddyAccordingToBvec(pulse,pulseinfo,basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
 
 				#Interleave 
+				if (interleaveFactor != 1):
+					new_pulse = pl.interleavePulse(new_pulse,int(pulseinfo[12]),interleaveFactor)	
 
 				#Save to correct location
 				pl.write_pulse(simDirClusterDirectionMotionAndEddy+"/pulse",new_pulse)
 
-				#Move eddy distorted pulse to simdir
+				#Save copy of distorted pulse
 				shutil.copy(simDirClusterDirectionMotionAndEddy+"/pulse", simDirCluster+"/Distortions/Eddy/pulseEddy"+str(index))
-
 
 
 			if normalImages == False:
