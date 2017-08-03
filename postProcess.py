@@ -14,18 +14,27 @@ import argparse
 #import possumLib as pl
 #pl=reload(pl)
 
+def str2bool(v):
+	#Function allows boolean arguments to take a wider variety of inputs
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description="Tidy up the simulations.")
 
 parser.add_argument("simulation_dir",help="Path to the simulation directory (output_dir of generateFileStructure.py)")
 parser.add_argument("num_images",help='Number of volumes.',type=int)
-parser.add_argument("--simulate_artefact_free",help='Run simulation on datasets without eddy-current and motion artefacts. Default=True.',action="store_true",default=1)
-parser.add_argument("--simulate_distorted",help='Run simulation datasets with eddy-current and motion artefacts. Default=False',action="store_true",default=0)
+parser.add_argument("--simulate_artefact_free",help='Run simulation on datasets without eddy-current and motion artefacts. Default=True.', type=str2bool, nargs='?',const=True,default=True)
+parser.add_argument("--simulate_distorted",help='Run simulation datasets with eddy-current and motion artefacts. Default=False',type=str2bool, nargs='?',const=True,default=False)
 parser.add_argument("--noise_levels",help="Set sigma for the noise level in the dataset. Can pass multiple values seperated by spaces.",nargs="+",default=0,type=float)
 parser.add_argument("--interleave_factor",help="Set this if the simulation slice order has been interleaved.",type=int,default=1)
 
 args=parser.parse_args()
 
-simDirCluster = os.path.abspath(args.simulation_dir)
+simDir = os.path.abspath(args.simulation_dir)
 numImages = args.num_images
 normalImages = args.simulate_artefact_free
 motionAndEddyImages = args.simulate_distorted
@@ -82,46 +91,44 @@ def unInterleaveSignal(signal, numSlices, interleaveFactor):
 	return signalUninterleaved
 
 
-
-
-resultsDir = simDirCluster+"/Results"
+resultsDir = simDir+"/Results"
 
 for direction in range(numImages):
 	if motionAndEddyImages == True:
-		simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(direction)
+		simDirDirectionMotionAndEddy = simDir+"/DirectionMotionAndEddy"+str(direction)
 		if interleaveFactor > 1:
-			signal = readSignal(simDirClusterDirectionMotionAndEddy+'/signal')
+			signal = readSignal(simDirDirectionMotionAndEddy+'/signal')
 			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
-			writeSignal(simDirClusterDirectionMotionAndEddy+'/signalUninterleaved',signalUninterleaved)
+			writeSignal(simDirDirectionMotionAndEddy+'/signalUninterleaved',signalUninterleaved)
 		else:
-			call(["cp",simDirClusterDirectionMotionAndEddy+'/signal',simDirClusterDirectionMotionAndEddy+'/signalUninterleaved'])
+			call(["cp",simDirDirectionMotionAndEddy+'/signal',simDirDirectionMotionAndEddy+'/signalUninterleaved'])
 
 	if normalImages == True:
-		simDirClusterDirection = simDirCluster+"/Direction"+str(direction)
+		simDirDirection = simDir+"/Direction"+str(direction)
 		if interleaveFactor > 1:
-			signal = readSignal(simDirClusterDirection+'/signal')
+			signal = readSignal(simDirDirection+'/signal')
 			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
-			writeSignal(simDirClusterDirection+'/signalUninterleaved',signalUninterleaved)
+			writeSignal(simDirDirection+'/signalUninterleaved',signalUninterleaved)
 		else:
-			call(["cp",simDirClusterDirection+'/signal',simDirClusterDirection+'/signalUninterleaved'])
+			call(["cp",simDirDirection+'/signal',simDirDirection+'/signalUninterleaved'])
 
 	#Generate noise
 	for sigma in noiseLevel:
 		if normalImages == True:
-			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirection+"/signalUninterleaved","-o",simDirClusterDirection+"/signalNoise"])
-			call(["signal2image","-i",simDirClusterDirection+"/signalNoise","-p",simDirClusterDirection+"/pulse","-o",simDirClusterDirection+"/imageNoise","-a"])
+			call(["systemnoise","-s",str(sigma),"-i",simDirDirection+"/signalUninterleaved","-o",simDirDirection+"/signalNoise"])
+			call(["signal2image","-i",simDirDirection+"/signalNoise","-p",simDirDirection+"/pulse","-o",simDirDirection+"/imageNoise","-a"])
 
 
 		if motionAndEddyImages == True:
-			call(["systemnoise","-s",str(sigma),"-i",simDirClusterDirectionMotionAndEddy+"/signalUninterleaved","-o",simDirClusterDirectionMotionAndEddy+"/signalNoise"])
-			call(["signal2image","-i",simDirClusterDirectionMotionAndEddy+"/signalNoise","-p",simDirClusterDirectionMotionAndEddy+"/pulse","-o",simDirClusterDirectionMotionAndEddy+"/imageNoise","-a"])
+			call(["systemnoise","-s",str(sigma),"-i",simDirDirectionMotionAndEddy+"/signalUninterleaved","-o",simDirDirectionMotionAndEddy+"/signalNoise"])
+			call(["signal2image","-i",simDirDirectionMotionAndEddy+"/signalNoise","-p",simDirDirectionMotionAndEddy+"/pulse","-o",simDirDirectionMotionAndEddy+"/imageNoise","-a"])
 
 		#Save
 		if motionAndEddyImages == True:
-			saveNoiseyImage(simDirClusterDirectionMotionAndEddy,resultsDir,"diff+eddy+motion_sigma{}_image{}.nii.gz".format(sigma,direction))
+			saveNoiseyImage(simDirDirectionMotionAndEddy,resultsDir,"diff+eddy+motion_sigma{}_image{}.nii.gz".format(sigma,direction))
 			convertImageToFloat(resultsDir,"diff+eddy+motion_sigma{}_image{}.nii.gz".format(sigma,direction))
 		if normalImages == True:
-			saveNoiseyImage(simDirClusterDirection,resultsDir,"diff_sigma{}_image{}.nii.gz".format(sigma,direction))
+			saveNoiseyImage(simDirDirection,resultsDir,"diff_sigma{}_image{}.nii.gz".format(sigma,direction))
 			convertImageToFloat(resultsDir,"diff_sigma{}_image{}.nii.gz".format(sigma,direction))
 
 #Merge
