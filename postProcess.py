@@ -29,7 +29,7 @@ parser.add_argument("simulation_dir",help="Path to the simulation directory (out
 parser.add_argument("num_images",help='Number of volumes.',type=int)
 parser.add_argument("--simulate_artefact_free",help='Run simulation on datasets without eddy-current and motion artefacts. Default=True.', type=str2bool, nargs='?',const=True,default=True)
 parser.add_argument("--simulate_distorted",help='Run simulation datasets with eddy-current and motion artefacts. Default=False',type=str2bool, nargs='?',const=True,default=False)
-parser.add_argument("--noise_levels",help="Set sigma for the noise level in the dataset. Can pass multiple values seperated by spaces.",nargs="+",default=0,type=float)
+parser.add_argument("--noise_levels",help="Set sigma for the noise level in the dataset. Can pass multiple values seperated by spaces.",nargs="+",type=float)
 parser.add_argument("--interleave_factor",help="Set this if the simulation slice order has been interleaved.",type=int,default=1)
 
 args=parser.parse_args()
@@ -38,7 +38,11 @@ simDir = os.path.abspath(args.simulation_dir)
 numImages = args.num_images
 normalImages = args.simulate_artefact_free
 motionAndEddyImages = args.simulate_distorted
-noiseLevel = args.noise_levels
+if args.noise_levels == None:
+	noiseLevel = [0.0]
+else:
+	noiseLevel = args.noise_levels
+print(noiseLevel)
 interleaveFactor = args.interleave_factor
 
 
@@ -56,8 +60,8 @@ def readSignal(signalPath):
 	fid = open(signalPath,"rb")
 	testval= np.fromfile(fid, dtype=np.uint32,count = 1)
 	dummy=np.fromfile(fid, dtype=np.uint32,count = 1)
-	nrows=np.fromfile(fid, dtype=np.uint32,count = 1)
-	ncols=np.fromfile(fid, dtype=np.uint32,count = 1)
+	nrows=np.fromfile(fid, dtype=np.uint32,count = 1)[0]
+	ncols=np.fromfile(fid, dtype=np.uint32,count = 1)[0]
 	signal=np.fromfile(fid,dtype=np.float64,count = nrows*ncols)
 	signal = np.reshape(signal,(nrows, ncols),order='F')
 	return signal
