@@ -123,11 +123,23 @@ def get_motion_for_volume(motion_mat,TR,index):
 	num_entries = np.floor(TR/ time_increments).astype(np.int32)
 	start_index = index*num_entries
 	end_index = (index+1)*num_entries
-	return motion_mat[start_index:end_index,:]
+	motion_mat_volume = motion_mat[start_index:end_index,:]
+	motion_mat_volume[:,0] = motion_mat[0:motion_mat_volume.shape[0],0]
+	return motion_mat_volume
 
 def makeFolder(directory):
   if not os.path.exists(directory):
     os.makedirs(directory)
+
+def read_interpolated_motion(dir,num_volumes,TR):
+	for i in range(num_volumes):
+		mot = np.loadtxt(dir+'/motion'+str(i)+'.txt')
+		if i == 0:
+			nrows = mot.shape[0]
+			mot_total = np.zeros((nrows*num_volumes,7))
+		mot_total[i*nrows:(i+1)*nrows,:] = mot
+		mot_total[i*nrows:(i+1)*nrows,0] += TR*i
+	return mot_total 
 
 #Interpolate using MJ's code
 
@@ -139,6 +151,8 @@ if __name__ == "__main__":
 	motion_mat = initialise_motion_mat(TR,num_slices,args.num_volumes)
 	motion_mat = add_slow_drift(motion_mat,args.drift_severity,args.drift_type,TR)
 	motion_mat = add_motion_spikes(motion_mat,args.spike_frequency,args.spike_severity,TR)
+	#plot_motion(motion_mat)
+
 	#Divide into volumes and feed each into MJ's interpmot script
 	makeFolder(args.output_dir)
 	for i in range(args.num_volumes):
@@ -148,4 +162,6 @@ if __name__ == "__main__":
 		np.savetxt(out_name,motion_mat_volume_interp)
 
 
-	#plot_motion(motion_mat)
+	#Check interpolated motion files
+	#mot_interpolated = read_interpolated_motion(args.output_dir,args.num_volumes,TR)
+	#plot_motion(mot_interpolated)
