@@ -23,10 +23,14 @@ def read_args():
 	parser.add_argument("drift_type",help="linear or cosine")
 	parser.add_argument("spike_severity",help="set from 0-1: 1 corresponds to max spike of 5mm and 5deg.",type=float)
 	parser.add_argument("spike_frequency",help="set from 0-1: sets probability of a motion spike in a volume",type=float)
+	parser.add_argument("--seed",help="set random seed.",type=int)
+
 	args=parser.parse_args()
-	print(args.drift_type)
 	if (args.drift_type != "linear" and args.drift_type != "cosine"): 
 		raise ValueError('Slow drift motion must be cosine or linear')
+	if args.seed is not None:
+		random.seed(args.seed)
+		np.random.seed(args.seed)
 	return args
 
 def read_possum_params(possum_dir):
