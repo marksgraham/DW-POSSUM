@@ -213,7 +213,8 @@ for bvalue in (1000,2000):
     coefficientNii.header.set_data_dtype('float32')
     coefficientNii.to_filename(os.path.join(saveDir, fName))
 
-
+    #Free memory
+    del data, maskData
 
     # #Predict back data
     # dataPredicted = np.zeros((dataSize[0],dataSize[1],dataSize[2],
@@ -263,3 +264,6 @@ for bvalue in (1000,2000):
                 if segUpsampledData[i, j, k, 2] > 0.9:
                     coeffUpsampledData[i, j, k, :] = csf_coeffs_rep 
     coeffUpsampledNii.to_filename(saveDir + '/coefficientsUpsampledb' + str(bvalue) + 'n' + str(order) + '.nii.gz')
+    #Free memory
+    del coeffUpsampledData, segUpsampledData
+
