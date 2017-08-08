@@ -10,8 +10,7 @@ from subprocess import call
 import sys
 import os.path
 import argparse
-#import possumLib as pl
-#pl=reload(pl)
+
 
 def saveImage(simDir,saveImageDir,fileName):
     call(["mv", simDir + "/image_abs.nii.gz", os.path.join(saveImageDir,fileName)])

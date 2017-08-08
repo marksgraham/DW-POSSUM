@@ -11,8 +11,7 @@ from subprocess import call
 import sys
 import numpy as np
 import argparse
-#import possumLib as pl
-#pl=reload(pl)
+
 
 def str2bool(v):
 	#Function allows boolean arguments to take a wider variety of inputs

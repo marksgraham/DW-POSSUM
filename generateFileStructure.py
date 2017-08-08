@@ -10,7 +10,7 @@ from subprocess import call
 from dipy.io import read_bvals_bvecs
 import dipy.reconst.shm as shm
 import nibabel as nib
-import possumLib as pl
+from Library import possumLib as pl
 import numpy as np
 import scipy.io
 import argparse

@@ -10,7 +10,7 @@ import os
 from subprocess import call
 from dipy.io import read_bvals_bvecs
 from dipy.external.fsl import write_bvals_bvecs
-import possumLib as pl
+from Library import possumLib as pl
 import nibabel as nib
 import numpy as np
 from dipy.core.gradients import gradient_table
