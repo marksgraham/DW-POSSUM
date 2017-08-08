@@ -1,44 +1,69 @@
 #!/usr/bin/env python
-
-#Code to generate a full shell of diffusion-weighted, eddy distorted images using FSL's possum, along with data that can be used to
-#establish a ground truth.
+#Code to generate distorted pulse files only a full shell of diffusion-weighted, eddy distorted images using FSL's possum.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import os
+import sys
 from subprocess import call
 from dipy.io import read_bvals_bvecs
 import dipy.reconst.shm as shm
 import nibabel as nib
-import possumLib as pl
 import numpy as np
 import scipy.io
-#pl = reload(pl)
+import argparse
+import shutil
 
-################Check the following are correct before running#################
-#Set relevant simulation directories:
-simDir = os.path.abspath('Files/possumSimdirSESliceRes4SusceptExtendedFOV')
+#Add root to pythonpath for lib import
+dir_path = os.path.dirname(os.path.realpath(__file__))
+package_path = os.path.abspath(os.path.join(dir_path,os.pardir))
+sys.path.insert(0,package_path)
+from Library import possumLib as pl
 
-#set output directory
-outputDirList = '../MotionWithSus/JesperPaper/pulseFilesExtendedFOV';
+#Parse arguments
+def str2bool(v):
+	#Function allows boolean arguments to take a wider variety of inputs
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
-#Load in bvecs, bvals
-bvalDirList = 'bvalsfmrib'
-bvecDirList = 'bvecsfmrib'
+parser = argparse.ArgumentParser(description="Setup all the files required to run the simulations.")
 
-#Choose number of images to generate (must be <= length of bval file)
-numImagesList=65;
+parser.add_argument("possum_dir",help="Path to the possum simulation directory.")
+parser.add_argument("output_dir",help="Path to output directory.")
+parser.add_argument("bvals",help="Path to bval file.")
+parser.add_argument("bvecs",help="Path to bvec file.")
+parser.add_argument("--num_images",help='Number of volumes. Defaults to number of entries in bval file.',type=int)
+parser.add_argument("--interleave_factor",help="Interleave factor for slice-acquistion. Default=1. ",type=int,default=1)
 
 
-#Choose whether to keep artefact-free images
-normalImages = "off";
+args=parser.parse_args()
 
-#Choose whether to generate distorted images
-motionAndEddyImages = "on";
+#Check arguments and setup paths
+simDir = os.path.abspath(args.possum_dir)
+outputDir = args.output_dir
+bvalDir = args.bvals
+bvecDir = args.bvecs
+#Check bval entries
+bvals, bvecs = read_bvals_bvecs(
+		args.bvals, 
+		args.bvecs)
 
-###############################################################################
+#Check num_images
+num_bvals = len(bvals)
+if args.num_images:
+	numImages= args.num_images
+	if numImages > num_bvals:
+		print("Warning: num_images cannot be greater than the number of entries in the bval file. Setting to this maximum.")
+		numImages = num_bvals
+else:
+	numImages= num_bvals
 
+interleaveFactor = args.interleave_factor
 
 
 #Set eddy current distortion parameters
@@ -55,52 +80,36 @@ eddyGradients = 'decaying'; #Flat or decaying
 
 #Set directories
 codeDir =  os.path.abspath('.')
-matlabDir = "/Applications/MATLAB_R2014b.app/bin/matlab"
 
-
-
-bvals, bvecs = read_bvals_bvecs(
-	'../Code/SimulateImages/bvalsbvecs/'+bvalDirList, 
-	'../Code/SimulateImages/bvalsbvecs/'+bvecDirList)
-print(bvals)
-print(bvecs)
-
+print('Output directory: ' + outputDir)
 
 
 #Make directory for cluster files
-simDirCluster=outputDirList
-call(["mkdir",simDirCluster])
-pl.initialise(simDir,codeDir)
+pl.makeFolder(outputDir)
 
 
 
-for index, bvec in enumerate(bvecs[0:numImagesList]):
+for index, bvec in enumerate(bvecs[0:numImages]):
 	#This workaround lets you carry on if generating is interrupted
-	if index  == 0 :
-		#Copy over all pulse files
-		call(["cp",simDir+"/pulse.info",simDirCluster + '/'])
-		call(["cp",simDir+"/pulse.readme",simDirCluster + '/'])
-		call(["cp",simDir+"/pulse.posx",simDirCluster + '/'])
-		call(["cp",simDir+"/pulse.posy",simDirCluster + '/'])
-		call(["cp",simDir+"/pulse.posz",simDirCluster + '/'])
-		call(["cp",simDir+"/pulse",simDirCluster + '/'])
-
-
-
-		
-	#Make distorted eddy pulse
-	if eddyGradients=='flat':
-		pl.generateEddyPulseFromBvecFlat(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
+	if index < 0:
+		pass
 	else:
-		#pl.generateEddyPulseFromBvec(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
-		pl.addEddyAccordingToBvec(basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
+		#Read in pulse
+		if index == 0:
+			pulse=pl.read_pulse(simDir+"/pulse")
+			pulseinfo = np.loadtxt(simDir+'/pulse.info')
 
-	#Move eddy distorted pulse to simdir
-	call(["mv",codeDir + "/pulse_new", simDirCluster+"/pulse"+str(index)])
+		#Make distorted eddy pulse
+		if eddyGradients=='flat':
+			pl.generateEddyPulseFromBvecFlat(simDir,codeDir,matlabDir,basicSettings,ep, tau,bvals[index], bvec)
+		else:
+			new_pulse = pl.addEddyAccordingToBvec(pulse,pulseinfo,basicSettings[0],basicSettings[1],basicSettings[2],basicSettings[3],ep, tau,bvals[index], bvec)
 
+		#Interleave 
+		if (interleaveFactor != 1):
+			new_pulse = pl.interleavePulse(new_pulse,int(pulseinfo[12]),interleaveFactor)	
 
+		#Save to correct location
+		pl.write_pulse(outputDir+"/pulse"+str(index),new_pulse)
 
-
-#Tidy up:
-pl.tidyUp(simDir,codeDir)
 
