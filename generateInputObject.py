@@ -40,7 +40,7 @@ if not os.path.exists(out):
 	os.makedirs(out)
 
 #Use FSL's FAST to segment 
-call(["fast","-S","2","-n","4","--verbose","-o",out+"/fast","-p",t1,t2])
+call(["fast","-S","2","-n","3","--verbose","-o",out+"/fast","-p",t1,t2])
 call(["fslmerge","-a",out+'/HCP_seg.nii.gz',out+'/fast_prob_2',out+'/fast_prob_0',out+'/fast_prob_1'])
 
 #Extract diffusion shells
