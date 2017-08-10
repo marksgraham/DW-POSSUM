@@ -22,6 +22,7 @@ parser.add_argument("t1",help="Path to T1 image")
 parser.add_argument("t2",help="Path to T2 image")
 parser.add_argument("dwi",help="Path to DWI directory")
 parser.add_argument("out",help="Path to output directory")
+parser.add_argument("--bvalues",help="B-values to generate spherical harmonics for. Default b=1000 only.",nargs="+",type=int)
 
 args=parser.parse_args()
 
@@ -29,6 +30,10 @@ t1=os.path.abspath(args.t1)
 t2=os.path.abspath(args.t2)
 dwi=os.path.abspath(args.dwi)
 out=os.path.abspath(args.out)
+if args.bvalues == None:
+    bvalues = [1000]
+else:
+    bvalues = args.bvalues
 
 print('\n')
 print('T1 image: ' + t1)
@@ -167,7 +172,7 @@ seg_clipped.to_filename(out + '/HCP_seg_clipped_new.nii.gz')
 order =8;
 
 # Directories
-for bvalue in (1000,2000):
+for bvalue in bvalues:
     diffusionDir = out +'/DiffusionReordered/b' + \
         str(bvalue)
 
