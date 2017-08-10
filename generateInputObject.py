@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import argparse
 import os
-from subprocess import call
+from subprocess import call, Popen, PIPE
 from dipy.io import read_bvals_bvecs
 from dipy.external.fsl import write_bvals_bvecs
 from Library import possumLib as pl
@@ -41,7 +41,16 @@ if not os.path.exists(out):
 
 #Use FSL's FAST to segment 
 call(["fast","-S","2","-n","3","--verbose","-o",out+"/fast","-p",t1,t2])
-call(["fslmerge","-a",out+'/HCP_seg.nii.gz',out+'/fast_prob_2',out+'/fast_prob_0',out+'/fast_prob_1'])
+#Combine into seg in order 1. GM 2. WM 3.CSF. Normally, fast outputs segmentations in order WM, CSF, GM but occasionally does CSF WM GM - need to check for this case.
+tissue_mean = np.zeros((3))
+for i in range(3):
+    p=Popen(['fslstats',out+'/fast_pve_'+str(i)+'.nii.gz', '-m'],stdout=PIPE)
+    output= p.communicate()
+    tissue_mean[i] = float(output[0])
+if tissue_mean[1] < tissue_mean[0]:
+    call(["fslmerge","-a",out+'/HCP_seg.nii.gz',out+'/fast_prob_2',out+'/fast_prob_0',out+'/fast_prob_1'])
+else:
+    call(["fslmerge","-a",out+'/HCP_seg.nii.gz',out+'/fast_prob_2',out+'/fast_prob_1',out+'/fast_prob_0'])
 
 #Extract diffusion shells
 bvals, bvecs = read_bvals_bvecs(dwi+'/bvals', dwi+'/bvecs')
