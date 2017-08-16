@@ -23,6 +23,7 @@ parser.add_argument("t2",help="Path to T2 image")
 parser.add_argument("dwi",help="Path to DWI directory")
 parser.add_argument("out",help="Path to output directory")
 parser.add_argument("--bvalues",help="B-values to generate spherical harmonics for. Default b=1000 only.",nargs="+",type=int)
+parser.add_argument("--csf_factor",help="A factor < 1 provides extra signal attenuation in the CSF. Default 1. ",type=float)
 
 args=parser.parse_args()
 
@@ -34,6 +35,10 @@ if args.bvalues == None:
     bvalues = [1000]
 else:
     bvalues = args.bvalues
+if args.csf_factor == None:
+    csf_factor = 1.0
+else:
+    csf_factor = args.csf_factor
 
 print('\n')
 print('T1 image: ' + t1)
@@ -269,7 +274,7 @@ for bvalue in bvalues:
     #coeffNii = nib.load(saveDir + '/coefficientsb' + str(bvalue) + 'n' + str(order) + '.nii.gz')
     #csf_coeffs_rep = coeffNii.dataobj[84, 36, 66, :]
     #np.save('Files/SphericalHarmonics/csf_coeff_b'+str(bvalue),csf_coeffs_rep)
-    csf_coeffs_rep = 0.65 * np.load('Files/SphericalHarmonics/csf_coeff_b'+str(bvalue)+'.npy')
+    csf_coeffs_rep = csf_factor * np.load('Files/SphericalHarmonics/csf_coeff_b'+str(bvalue)+'.npy')
     print(csf_coeffs_rep)
 
     for i in range(0, segUpsampledData.shape[0]):
