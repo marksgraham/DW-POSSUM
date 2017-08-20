@@ -195,9 +195,8 @@ for index, bvec in enumerate(bvecs[0:numImages]):
 
 		attenuatedBrainNii = nib.Nifti1Image(attenuatedBrainData, segmentedBrain.get_affine(),segmentedBrain.get_header())
 
-		attenuatedBrainNii.to_filename(os.path.join(codeDir,'attenuatedBrainPy.nii.gz'))
+		attenuatedBrainNii.to_filename(os.path.join( outputDirDirection,"brain.nii.gz"))
 
-		shutil.move(codeDir + "/attenuatedBrainPy.nii.gz", outputDirDirection+ "/brain.nii.gz")
 
 		#Register to reference brain to get sizes right
 		print('Registering volume ' + str(index))
