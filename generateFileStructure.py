@@ -5,18 +5,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-from subprocess import call
-from dipy.io import read_bvals_bvecs
-import dipy.reconst.shm as shm
-import nibabel as nib
-from Library import possumLib as pl
-import numpy as np
-import scipy.io
+# Handle arguments (before slow imports so --help can be fast)
 import argparse
-import shutil
-
-#Parse arguments
 def str2bool(v):
 	#Function allows boolean arguments to take a wider variety of inputs
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -39,8 +29,17 @@ parser.add_argument("--brain",help='Path to POSSUM input object.')
 parser.add_argument("--brain_diffusion",help='Path to directory containing spherical harmonic coefficients for input object.')
 parser.add_argument("--generate_artefact_free",help='Generate datasets without eddy-current and motion artefacts. Default=True.', type=str2bool, nargs='?',const=True,default=True)
 parser.add_argument("--generate_distorted",help='Generate datasets with eddy-current and motion artefacts. Default=False', type=str2bool, nargs='?',const=True,default=False)
-
 args=parser.parse_args()
+
+import os
+from subprocess import call
+from dipy.io import read_bvals_bvecs
+import dipy.reconst.shm as shm
+import nibabel as nib
+from Library import possumLib as pl
+import numpy as np
+import scipy.io
+import shutil
 
 #Check arguments and setup paths
 simDir = os.path.abspath(args.possum_dir)

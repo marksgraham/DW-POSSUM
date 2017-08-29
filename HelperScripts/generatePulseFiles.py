@@ -4,24 +4,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import sys
-from subprocess import call
-from dipy.io import read_bvals_bvecs
-import dipy.reconst.shm as shm
-import nibabel as nib
-import numpy as np
-import scipy.io
+# Handle arguments (before slow imports so --help can be fast)
 import argparse
-import shutil
-
-#Add root to pythonpath for lib import
-dir_path = os.path.dirname(os.path.realpath(__file__))
-package_path = os.path.abspath(os.path.join(dir_path,os.pardir))
-sys.path.insert(0,package_path)
-from Library import possumLib as pl
-
-#Parse arguments
 def str2bool(v):
 	#Function allows boolean arguments to take a wider variety of inputs
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -32,16 +16,29 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 parser = argparse.ArgumentParser(description="Setup all the files required to run the simulations.")
-
 parser.add_argument("possum_dir",help="Path to the possum simulation directory.")
 parser.add_argument("output_dir",help="Path to output directory.")
 parser.add_argument("bvals",help="Path to bval file.")
 parser.add_argument("bvecs",help="Path to bvec file.")
 parser.add_argument("--num_images",help='Number of volumes. Defaults to number of entries in bval file.',type=int)
 parser.add_argument("--interleave_factor",help="Interleave factor for slice-acquistion. Default=1. ",type=int,default=1)
-
-
 args=parser.parse_args()
+
+import os
+import sys
+from subprocess import call
+from dipy.io import read_bvals_bvecs
+import dipy.reconst.shm as shm
+import nibabel as nib
+import numpy as np
+import scipy.io
+import shutil
+
+#Add root to pythonpath for lib import
+dir_path = os.path.dirname(os.path.realpath(__file__))
+package_path = os.path.abspath(os.path.join(dir_path,os.pardir))
+sys.path.insert(0,package_path)
+from Library import possumLib as pl
 
 #Check arguments and setup paths
 simDir = os.path.abspath(args.possum_dir)

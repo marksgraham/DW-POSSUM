@@ -5,7 +5,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+# Handle arguments (before slow imports so --help can be fast)
 import argparse
+parser = argparse.ArgumentParser(description="Generate POSSUM input object and spherical harmonic coefficients from an HCP dataset")
+parser.add_argument("t1",help="Path to T1 image")
+parser.add_argument("t2",help="Path to T2 image")
+parser.add_argument("dwi",help="Path to DWI directory")
+parser.add_argument("out",help="Path to output directory")
+parser.add_argument("--bvalues",help="B-values to generate spherical harmonics for. Default b=1000 only.",nargs="+",type=int)
+parser.add_argument("--csf_factor",help="A factor < 1 provides extra signal attenuation in the CSF. Default 1. ",type=float)
+args=parser.parse_args()
+
+#Now imports
 import os
 from subprocess import call, Popen, PIPE
 from dipy.io import read_bvals_bvecs
@@ -16,17 +27,7 @@ import numpy as np
 from dipy.core.gradients import gradient_table
 import dipy.reconst.shm as shm
 
-parser = argparse.ArgumentParser(description="Generate POSSUM input object and spherical harmonic coefficients from an HCP dataset")
-
-parser.add_argument("t1",help="Path to T1 image")
-parser.add_argument("t2",help="Path to T2 image")
-parser.add_argument("dwi",help="Path to DWI directory")
-parser.add_argument("out",help="Path to output directory")
-parser.add_argument("--bvalues",help="B-values to generate spherical harmonics for. Default b=1000 only.",nargs="+",type=int)
-parser.add_argument("--csf_factor",help="A factor < 1 provides extra signal attenuation in the CSF. Default 1. ",type=float)
-
-args=parser.parse_args()
-
+#Assign args
 t1=os.path.abspath(args.t1)
 t2=os.path.abspath(args.t2)
 dwi=os.path.abspath(args.dwi)
