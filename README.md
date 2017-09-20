@@ -37,7 +37,7 @@ Documentation for each command can be found using the -h flag.
 
 ### Datasets
 
-Some of the simualated datasets used in the journal papers referenced below can be downloaded [here.](https://www.nitrc.org/projects/diffusionsim/)
+Some of the simulated datasets used in the journal papers referenced below can be downloaded [here.](https://www.nitrc.org/projects/diffusionsim/)
 
 ### References
 
