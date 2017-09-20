@@ -18,14 +18,20 @@ args=parser.parse_args()
 
 #Now imports
 import os
+import sys
 from subprocess import call, Popen, PIPE
 from dipy.io import read_bvals_bvecs
 from dipy.external.fsl import write_bvals_bvecs
-from Library import possumLib as pl
 import nibabel as nib
 import numpy as np
 from dipy.core.gradients import gradient_table
 import dipy.reconst.shm as shm
+
+#Add root to pythonpath for lib import
+dir_path = os.path.dirname(os.path.realpath(__file__))
+package_path = os.path.abspath(os.path.join(dir_path,os.pardir))
+sys.path.insert(0,package_path)
+from Library import possumLib as pl
 
 #Assign args
 t1=os.path.abspath(args.t1)
