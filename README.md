@@ -46,4 +46,8 @@ If you use DW-POSSUM in your research, please cite both the POSSUM and DW-POSSUM
 - Ivana Drobnjak, David Gavaghan, Endre Süli, Joe Pitt-Francis and Mark Jenkinson. Development of a functional magnetic resonance imaging simulator for modeling realistic rigid-body motion artifacts, MRM 56 364–380, 2006.
 - Mark S. Graham, Ivana Drobnjak and Hui Zhang. Realistic simulation of artefacts in diffusion MRI for validating post-processing correction techniques, NeuroImage 125, 1079-1094, 2016.
 
+We have extended POSSUM to simulate spin-echo sequences, enabling (in combination with this codebase) the simulation of DW-MR data with susceptibility artefacts. The new POSSUM release is forthcoming, though some simulated DW-MR datasets with susceptibility artefacts have been made available [here.](https://www.nitrc.org/projects/diffusionsim/) The relevant reference for this work is:
+
+- Mark S. Graham, Ivana Drobnjak, Mark Jenkinson and Hui Zhang. Quantitative assessment of the susceptibility artefact and its interaction with motion in diffusion MRI, PLoS ONE 12(10): e0185647, 2017.
+
 
