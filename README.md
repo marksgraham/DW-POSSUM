@@ -1,4 +1,4 @@
-This code enables the simulation of DW-MR data using the POSSUM simulator.
+This code enables the simulation of DW-MR data using the [POSSUM](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/POSSUM) simulator.
 
 ### Dependencies
 * [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
