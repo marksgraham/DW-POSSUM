@@ -221,3 +221,44 @@ def interleavePulse(pulse, numSlices, interleaveFactor):
       pulseInterleaved[startIndexOld:endIndexOld,1:] = pulse[startIndex:endIndex,1:]
       counter = counter + 1
   return pulseInterleaved
+
+def get_motion_level(directory,translation_threshold=2.5,rotation_threshold=2.5):
+  '''Roughly classify the amount of motion per slice for calculating likelihood of signal dropouts - 1 = severe motion, 2 = moderate motion'''
+  motion_path = os.path.join(directory,'motion')
+  motion = np.loadtxt(motion_path)
+  max_motion = np.max(motion[:,1:],axis=0)
+  min_motion = np.min(motion[:,1:],axis=0)
+  diff_motion = np.abs(max_motion-min_motion)
+  diff_motion[:3] = diff_motion[:3]*1000
+  diff_motion[3:] = np.rad2deg(diff_motion[3:])
+
+  if np.any( diff_motion[:3] > translation_threshold):
+      return 1    
+  elif np.any(diff_motion[3:] > rotation_threshold):
+      return 1
+  elif np.any( diff_motion[:3] > 1):
+      return 2    
+  elif np.any(diff_motion[3:] > 1):
+      return 2
+  else:
+      return 0
+
+def add_signal_dropout(signal,motion_level,num_slices,num_voxels_per_slice):
+  if motion_level ==0:
+    return signal
+  if motion_level == 1:
+    if np.random.random() < 0.9: #Add dropout to 90% of volumes with severe motion
+     for i in range(num_slices):
+       if np.random.random() < 0.2:
+         dropout_factor = np.random.random()
+         signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] = signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] * dropout_factor
+
+  elif motion_level == 2: #Don't add dropout to volumes with moderate motion atm
+    for i in range(num_slices):
+      if np.random.random() < 0.0: #Dont add to examples with mild motion
+        dropout_factor = np.random.random()
+        signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] = signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] * dropout_factor
+  return signal
+
+
+

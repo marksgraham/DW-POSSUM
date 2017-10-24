@@ -24,6 +24,7 @@ parser.add_argument("--simulate_artefact_free",help='Run simulation on datasets 
 parser.add_argument("--simulate_distorted",help='Run simulation datasets with eddy-current and motion artefacts. Default=False',type=str2bool, nargs='?',const=True,default=False)
 parser.add_argument("--noise_levels",help="Set sigma for the noise level in the dataset. Can pass multiple values seperated by spaces.",nargs="+",type=float)
 parser.add_argument("--interleave_factor",help="Set this if the simulation slice order has been interleaved.",type=int,default=1)
+parser.add_argument("--signal_dropout",help="Set this to simulate signal dropout.",type=str2bool,nargs='?',const=True,default=False)
 args=parser.parse_args()
 
 #Imports
@@ -31,6 +32,7 @@ import os
 from subprocess import call
 import sys
 import numpy as np
+from Library import possumLib as pl
 
 #Assign args
 simDir = os.path.abspath(args.simulation_dir)
@@ -99,9 +101,12 @@ resultsDir = simDir+"/Results"
 for direction in range(numImages):
 	if motionAndEddyImages == True:
 		simDirDirectionMotionAndEddy = simDir+"/DirectionMotionAndEddy"+str(direction)
-		if interleaveFactor > 1:
+		if interleaveFactor > 1 or args.signal_dropout == True:
 			signal = readSignal(simDirDirectionMotionAndEddy+'/signal')
 			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
+			if args.signal_dropout == True:
+				motion_level = pl.get_motion_level(simDirDirectionMotionAndEddy)
+				signalUninterleaved = pl.add_signal_dropout(signalUninterleaved,motion_level,55,72*86)
 			writeSignal(simDirDirectionMotionAndEddy+'/signalUninterleaved',signalUninterleaved)
 		else:
 			call(["cp",simDirDirectionMotionAndEddy+'/signal',simDirDirectionMotionAndEddy+'/signalUninterleaved'])
