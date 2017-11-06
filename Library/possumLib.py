@@ -245,11 +245,16 @@ def get_motion_level(directory,translation_threshold=2.5,rotation_threshold=2.5)
 
 def add_signal_dropout(signal,motion_level,num_slices,num_voxels_per_slice):
   if motion_level ==0:
-    return signal
+    if np.random.random() < 0: #Add dropout  volumes with no motion
+      for i in range(num_slices):
+        if np.random.random() < 0.4:
+          dropout_factor = np.random.random()
+          signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] = signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] * dropout_factor
+  
   if motion_level == 1:
-    if np.random.random() < 0.9: #Add dropout to 90% of volumes with severe motion
+    if np.random.random() < 0.15: #Add dropout to 15% of volumes with severe motion
      for i in range(num_slices):
-       if np.random.random() < 0.2:
+       if np.random.random() < 0.4:
          dropout_factor = np.random.random()
          signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] = signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] * dropout_factor
 
