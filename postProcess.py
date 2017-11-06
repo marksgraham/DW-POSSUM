@@ -25,6 +25,7 @@ parser.add_argument("--simulate_distorted",help='Run simulation datasets with ed
 parser.add_argument("--noise_levels",help="Set sigma for the noise level in the dataset. Can pass multiple values seperated by spaces.",nargs="+",type=float)
 parser.add_argument("--interleave_factor",help="Set this if the simulation slice order has been interleaved.",type=int,default=1)
 parser.add_argument("--signal_dropout",help="Set this to simulate signal dropout.",type=str2bool,nargs='?',const=True,default=False)
+parser.add_argument("--bvals",help="Supply bvals to prevent signal dropout being addded to b=0 volumes.")
 args=parser.parse_args()
 
 #Imports
@@ -33,6 +34,7 @@ from subprocess import call
 import sys
 import numpy as np
 from Library import possumLib as pl
+from dipy.io import read_bvals_bvecs
 
 #Assign args
 simDir = os.path.abspath(args.simulation_dir)
@@ -45,6 +47,13 @@ else:
 	noiseLevel = args.noise_levels
 print(noiseLevel)
 interleaveFactor = args.interleave_factor
+if args.bvals != None:
+	bvals = read_bvals_bvecs(
+		args.bvals, 
+		None)
+else:
+	#If no bval create artifical file with all b=1000, so signal dropout is applied to every volume.
+	bvals = (1000,)* numImages 
 
 
 def saveImage(simDir,saveImageDir,fileName):
@@ -106,7 +115,8 @@ for direction in range(numImages):
 			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
 			if args.signal_dropout == True:
 				motion_level = pl.get_motion_level(simDirDirectionMotionAndEddy)
-				signalUninterleaved = pl.add_signal_dropout(signalUninterleaved,motion_level,55,72*86)
+				if bvals[numImages] > 50:
+					signalUninterleaved = pl.add_signal_dropout(signalUninterleaved,motion_level,55,72*86)
 			writeSignal(simDirDirectionMotionAndEddy+'/signalUninterleaved',signalUninterleaved)
 		else:
 			call(["cp",simDirDirectionMotionAndEddy+'/signal',simDirDirectionMotionAndEddy+'/signalUninterleaved'])
