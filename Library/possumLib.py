@@ -8,6 +8,8 @@ import os
 import nibabel as nib
 import pdb
 import dipy.core.geometry as geom
+
+
 import math
 
 # Function takes as input simDir, codeDir, matlabDir and set of eddy pulse features - saves -new_pulse to codeDir
