@@ -48,7 +48,7 @@ else:
 print(noiseLevel)
 interleaveFactor = args.interleave_factor
 if args.bvals != None:
-	bvals = read_bvals_bvecs(
+	bvals, _ = read_bvals_bvecs(
 		args.bvals, 
 		None)
 else:
@@ -115,7 +115,7 @@ for direction in range(numImages):
 			signalUninterleaved = unInterleaveSignal(signal,55,interleaveFactor)
 			if args.signal_dropout == True:
 				motion_level = pl.get_motion_level(simDirDirectionMotionAndEddy)
-				if bvals[numImages] > 50:
+				if int(bvals[direction]) > 50:
 					signalUninterleaved = pl.add_signal_dropout(signalUninterleaved,motion_level,55,72*86)
 			writeSignal(simDirDirectionMotionAndEddy+'/signalUninterleaved',signalUninterleaved)
 		else:

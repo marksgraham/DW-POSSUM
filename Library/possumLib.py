@@ -254,7 +254,7 @@ def add_signal_dropout(signal,motion_level,num_slices,num_voxels_per_slice):
           signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] = signal[:,num_voxels_per_slice*i:num_voxels_per_slice*(i+1)] * dropout_factor
   
   if motion_level == 1:
-    if np.random.random() < 0.15: #Add dropout to 15% of volumes with severe motion
+    if np.random.random() < 0.3: #Add dropout to 30% of volumes with severe motion
      for i in range(num_slices):
        if np.random.random() < 0.4:
          dropout_factor = np.random.random()
