@@ -7,7 +7,7 @@ from __future__ import print_function
 
 # Handle arguments (before imports so --help can be fast)
 def str2bool(v):
-	#Function allows boolean arguments to take a wider variety of inputs
+    #Function allows boolean arguments to take a wider variety of inputs
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
@@ -26,7 +26,6 @@ args=parser.parse_args()
 
 import os
 from subprocess import call
-import sys
 import os.path
 
 #Assign args
@@ -47,17 +46,17 @@ resultsDir = simDirCluster+"/Results"
 resultsNoiseDir = simDirCluster+"/ResultsNoise"
 
 for direction in range(numImages):
-	if normalImages == True:
-		simDirClusterDirection = simDirCluster+"/Direction"+str(direction)
-	if motionAndEddyImages == True:
-		simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(direction)
-	
-	#Run possum
-	if normalImages == True:
-		if os.path.isfile(simDirClusterDirection + '/image_abs.nii.gz') == False:
-			call(["possumX", simDirClusterDirection,"-n",str(processors),"-t","20"])
-	if motionAndEddyImages == True:
-		if os.path.isfile(simDirClusterDirectionMotionAndEddy + '/image_abs.nii.gz') == False:
-			call(["possumX", simDirClusterDirectionMotionAndEddy,"-n",str(processors),"-t","20"])
+    if normalImages == True:
+        simDirClusterDirection = simDirCluster+"/Direction"+str(direction)
+    if motionAndEddyImages == True:
+        simDirClusterDirectionMotionAndEddy = simDirCluster+"/DirectionMotionAndEddy"+str(direction)
+
+    #Run possum
+    if normalImages == True:
+        if os.path.isfile(simDirClusterDirection + '/image_abs.nii.gz') == False:
+            call(["possumX", simDirClusterDirection,"-n",str(processors),"-t","20"])
+    if motionAndEddyImages == True:
+        if os.path.isfile(simDirClusterDirectionMotionAndEddy + '/image_abs.nii.gz') == False:
+            call(["possumX", simDirClusterDirectionMotionAndEddy,"-n",str(processors),"-t","20"])
 
 
