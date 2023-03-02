@@ -1,7 +1,7 @@
 This code enables the simulation of DW-MR data using the [POSSUM](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/POSSUM) simulator.
 
 ### Dependencies
-* [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
+* [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation) 5.0.10 - DW-POSSUM has only been tested with this version
 * Python with [dipy](http://nipy.org/dipy/), [nibabel](http://nipy.org/nibabel/), numpy and scipy
 
 ### Setup
